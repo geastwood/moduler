@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <script src="../src/moduler.js"></script>
+    <script>
+        var foo = {
+            bar: {}
+        };
+
+        moduler.exports(foo.bar, 'fei', function() {
+            return {
+                name: 'fei in function',
+                ok: function() {
+                    return this.name;
+                }
+            }
+        });
+
+        moduler.exports(window, 'foo.liu', {
+            name: 'liu in object',
+            ok: function() {
+                return this.name;
+            }
+        });
+    </script>
+</body>
+</html>

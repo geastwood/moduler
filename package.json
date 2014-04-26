@@ -1,0 +1,26 @@
+{
+  "name": "moduler",
+  "version": "0.1.0",
+  "description": "Module manager in browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/geastwood/moduler.git"
+  },
+  "keywords": [
+    "module",
+    "namespace"
+  ],
+  "author": "Fei Liu <liu.feiwood@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/geastwood/moduler/issues"
+  },
+  "devDependencies": {
+    "grunt-contrib-jasmine": "~0.6.3",
+    "grunt-contrib-watch": "~0.6.1"
+  }
+}

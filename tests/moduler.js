@@ -25,3 +25,14 @@ describe('exports', function() {
         expect(fakeGlobal.anotherObj.some.deep.name.space.should.work.ok()).toBe('should work');
     });
 });
+describe('create', function() {
+
+    var foo = {bar: {}};
+
+    describe('test', function() {
+        it('should work', function() {
+            moduler.create(foo.bar);
+            expect(foo.bar.module.name).toBe('module itself');
+        });
+    });
+});

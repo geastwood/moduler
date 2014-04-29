@@ -41,7 +41,9 @@ var moduler = (function() {
 
     }());
 
-    moduleManager = function() {
+    var moduleManager = function(ns) {
+
+        ns.module = ns.module || {};
 
         return {
             define: function(name, fn, deps) {},
@@ -51,7 +53,7 @@ var moduler = (function() {
 
     return {
         create: function(ns) {
-            var obj = resolver(ns, 'module', {action: 'set', obj: {name: 'module itself'}});
+            return moduleManager(ns);
         },
         exports: function(target, name, obj) {
             return resolver(target, name, {action: 'set', obj: obj});

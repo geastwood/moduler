@@ -26,6 +26,15 @@
                 return this.name;
             }
         });
+        moduler.create(foo);
+        foo.define('bar', function() {
+            return {
+                name: 'bar',
+                hi: function() {
+                    return this.name + ' says hi';
+                }
+            };
+        });
     </script>
 </body>
 </html>

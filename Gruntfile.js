@@ -21,5 +21,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
+    grunt.registerTask('test', 'jasmine');
     grunt.registerTask('default', 'watch');
 };

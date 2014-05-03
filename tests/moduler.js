@@ -157,7 +157,7 @@ describe('mutilple objects', function() {
         var depFoo = foo.require(['module1', 'module2']);
         expect(depFoo.module2).not.toBeDefined();
         var depBar = bar.require(['module1', 'module2']);
-        expect(depBar.module2).not.toBeDefined();
+        expect(depBar.module1).not.toBeDefined();
     });
 
 });

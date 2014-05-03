@@ -3,7 +3,7 @@ beforeEach(function() {
     fakeGlobal = {name: 'fake global'};
 });
 
-describe('exports', function() {
+describe('static exports function', function() {
     var obj = {
         name: 'should work',
         ok: function() {
@@ -26,7 +26,7 @@ describe('exports', function() {
     });
 });
 
-describe('create', function() {
+describe('static create function', function() {
 
     var foo;
 
@@ -74,11 +74,36 @@ describe('define and require', function() {
         });
     });
 
-    describe('depencency', function() {
+    describe('should work with constructor function', function() {
 
         it('should work', function() {
 
+            foo.define('Person', function() {
+                var Person = function() {};
+                Person.prototype.name = 'John Doe';
+                Person.prototype.occupation = 'unemployed';
+                Person.prototype.introduce = function() {
+                    return 'My name is ' + this.name + ', and I\'m currently ' + this.occupation + '.';
+                };
+                return Person;
+            });
+
+            var dep = foo.require(['Person as P']);
+            var me = new dep.P();
+            expect(me.name).toBe('John Doe');
+            expect(me.introduce()).toBe('My name is John Doe, and I\'m currently unemployed.');
+            me.name = 'Fei Liu';
+            me.occupation = 'a web developer';
+            expect(me.name).toBe('Fei Liu');
+            expect(me.introduce()).toBe('My name is Fei Liu, and I\'m currently a web developer.');
+        });
+    });
+
+    describe('depencency', function() {
+        it('should work', function() {
+
             foo.define('fb', function(bar) {
+
                 return {
                     name: 'fb',
                     hi: function() {
@@ -91,6 +116,48 @@ describe('define and require', function() {
             expect(dep.fb.name).toBe('fb');
             expect(dep.fb.hi()).toBe('bar fb');
         });
+    });
+
+    describe('alias', function() {
+
+        it('should work', function() {
+
+            var dep = foo.require(['bar as b']);
+            expect(dep.b.name).toBe('bar');
+            expect(dep.b.hi()).toBe('bar says i\'m bar');
+
+        });
+    });
+
+});
+
+describe('mutilple objects', function() {
+
+    var foo, bar;
+    beforeEach(function() {
+        foo = {};
+        bar = {};
+        moduler.create(foo);
+        moduler.create(bar);
+        foo.define('module1', function() {
+            return {
+                name: 'module1',
+                description: 'should belong to foo'
+            };
+        });
+        bar.define('module2', function() {
+            return {
+                name: 'module2',
+                description: 'should belong to bar'
+            };
+        });
+    });
+
+    it('should work', function() {
+        var depFoo = foo.require(['module1', 'module2']);
+        expect(depFoo.module2).not.toBeDefined();
+        var depBar = bar.require(['module1', 'module2']);
+        expect(depBar.module2).not.toBeDefined();
     });
 
 });

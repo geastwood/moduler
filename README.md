@@ -25,7 +25,7 @@ It's possible to define a modue with previously defined module.
 foo.define('bar', function(module1, module2) {
     return {
         name: 'bar',
-        description: 'this module has dependencies "module1" and "module2"'
+        description: 'this module has dependencies 'module1' and 'module2''
     };
 }, ['module1', 'module2']);
 ```
@@ -46,21 +46,24 @@ foo.define('Person', function() {
 
 var dependency = foo.require(['Person']);
 var me = new dependency.Person();
-me.name = "Fei";
-me.introduce(); // log "My name is Fei";
+me.name = 'Fei';
+me.introduce(); // log 'My name is Fei';
 ```
 ## require (fetch) modules
 require a module
 ```javascript
 var dependency = foo.require(['bar']);
-// will inject 'bar' into dependency module
+
+// dependency will an object that containts 'bar' object
+'bar' in dependency; // log true
 ```
+
 ## alias
-Use "**as**" to alias a module when using "**require**"
+Use '**as**' to alias a module when using '**require**'
 ```javascript
-// providerd that a "Person" constructor module is already defined
-// now alias "Person" as "P"
-var dependency = foo.require('Person as P');
-P in dependency; // true
-Person in dependency; // false
+// providerd that a 'Person' constructor module is already defined
+// now alias 'Person' as 'P'
+var dependency = foo.require(['Person as P']);
+'P' in dependency; // log true
+'Person' in dependency; // log false
 ```

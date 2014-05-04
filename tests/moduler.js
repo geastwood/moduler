@@ -3,7 +3,19 @@ beforeEach(function() {
     fakeGlobal = {name: 'fake global'};
 });
 
+describe('api', function() {
+    it('should have static create', function() {
+        expect(moduler.create).toBeDefined();
+    });
+    it('should have static export', function() {
+        expect(moduler.exports).toBeDefined();
+    });
+    it('should have static extend', function() {
+        expect(moduler.extend).toBeDefined();
+    });
+});
 describe('static exports function', function() {
+
     var obj = {
         name: 'should work',
         ok: function() {
@@ -100,6 +112,7 @@ describe('define and require', function() {
     });
 
     describe('depencency', function() {
+
         it('should work', function() {
 
             foo.define('fb', function(bar) {

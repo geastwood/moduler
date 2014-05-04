@@ -29,7 +29,6 @@ var moduler = (function() {
                 return resolve(target[parse[1]], parse[2], options);
             }
 
-
             if (options.action === 'get') {
                 return target[name];
             } else if (options.action === 'set') {
@@ -37,6 +36,7 @@ var moduler = (function() {
                 if (typeof options.obj === undefined) {
                     throw new Error('Set action with an empty object.');
                 }
+
                 target[name] = options.obj;
                 return true;
 
@@ -85,12 +85,11 @@ var moduler = (function() {
 
     var moduleManager = function(ns) {
 
-        //ns.module = ns.module || {};
         var modules = {};
 
         var define = function(name, fn, deps) {
 
-            var status, args = [], that = this, i, len, dep, aModule;
+            var args = [], i, len, dep, aModule;
 
             if (!name) {
                 throw new Error('Module name is required when defining a module.');
@@ -113,15 +112,14 @@ var moduler = (function() {
                 }
 
                 args.push(aModule);
+
             }
 
             exports(modules, name, fn.apply(null, args));
 
         };
 
-        var require = function(deps, options) {
-
-            var rst = {};
+        var require = function(deps) {
 
             if (!isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
@@ -170,7 +168,8 @@ var moduler = (function() {
         },
         exports: function(target, name, obj) {
             return exports(target, name, obj);
-        }
+        },
+        extend: function() {}
     };
 
 }());

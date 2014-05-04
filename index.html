@@ -18,7 +18,7 @@
     <div class="wrapper">
       <header>
         <h1>Moduler</h1>
-        <p>moduler</p>
+        <p>A small module manager.</p>
         <p class="view"><a href="https://github.com/geastwood/moduler">View the Project on GitHub <small>geastwood/moduler</small></a></p>
         <ul>
           <li><a href="https://github.com/geastwood/moduler/zipball/master">Download <strong>ZIP File</strong></a></li>
@@ -54,12 +54,12 @@
 
 <p>It's possible to define a modue with previously defined module.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="c1">// suppose there are two modules</span>
+<div class="highlight highlight-javascript"><pre><span class="c1">// provided that there are two modules</span>
 <span class="c1">// module1 and module2 are already defined with foo.define</span>
 <span class="nx">foo</span><span class="p">.</span><span class="nx">define</span><span class="p">(</span><span class="s1">'bar'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">module1</span><span class="p">,</span> <span class="nx">module2</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="nx">name</span><span class="o">:</span> <span class="s1">'bar'</span><span class="p">,</span>
-        <span class="nx">description</span><span class="o">:</span> <span class="s1">'this module has dependencies '</span><span class="nx">module1</span><span class="s1">' and '</span><span class="nx">module2</span><span class="s1">''</span>
+        <span class="nx">description</span><span class="o">:</span> <span class="s1">'this module has dependencies "module1" and "module2"'</span>
     <span class="p">};</span>
 <span class="p">},</span> <span class="p">[</span><span class="s1">'module1'</span><span class="p">,</span> <span class="s1">'module2'</span><span class="p">]);</span>
 </pre></div>

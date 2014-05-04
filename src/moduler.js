@@ -119,11 +119,13 @@ var moduler = (function() {
 
         };
 
-        var require = function(deps) {
+        var require = function(deps, options) {
 
             if (!isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
+
+            options = options || {};
 
             // resove dependencies
             function resolve(target, deps) {
@@ -135,7 +137,7 @@ var moduler = (function() {
 
                     dep = deps[i];
 
-                    // remove the dependency name, parse deep namespace or alias
+                    // resolve the dependency name, parse deep namespace or alias
                     resolvedName = resolver.moduleName(dep);
 
                     // assign resolved module to resolved name
@@ -152,7 +154,7 @@ var moduler = (function() {
             }
 
             // we resovle currently empty object, if necessary we can augment exist module
-            return resolve({}, deps);
+            return resolve(options.base || {}, deps);
 
         };
 

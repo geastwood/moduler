@@ -174,3 +174,31 @@ describe('mutilple objects', function() {
     });
 
 });
+
+describe('augment object with require', function() {
+
+    var foo;
+    var baseObject = {
+        name: 'baseObject'
+    };
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+        foo.define('bar', function() {
+            return {
+                name: 'bar',
+                description: 'should be added to base object',
+                fn: function() {
+                    return this.name + ' should match as well.';
+                }
+            };
+        });
+    });
+    it('should augment baseObject', function() {
+        foo.require(['bar'], {base: baseObject});
+        expect(baseObject.name).toBe('baseObject');
+        expect(baseObject.bar.name).toBe('bar');
+        expect(baseObject.bar.description).toBe('should be added to base object');
+        expect(baseObject.bar.fn()).toBe('bar should match as well.');
+    });
+});

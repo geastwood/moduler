@@ -20,12 +20,12 @@ foo.define('bar', function() {
 ## define a module with multiple dependencies
 It's possible to define a modue with previously defined module.
 ```javascript
-// suppose there are two modules
+// provided that there are two modules
 // module1 and module2 are already defined with foo.define
 foo.define('bar', function(module1, module2) {
     return {
         name: 'bar',
-        description: 'this module has dependencies 'module1' and 'module2''
+        description: 'this module has dependencies "module1" and "module2"'
     };
 }, ['module1', 'module2']);
 ```

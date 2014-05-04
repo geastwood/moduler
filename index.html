@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Moduler by geastwood</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Moduler</h1>
+        <p>moduler</p>
+        <p class="view"><a href="https://github.com/geastwood/moduler">View the Project on GitHub <small>geastwood/moduler</small></a></p>
+        <ul>
+          <li><a href="https://github.com/geastwood/moduler/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/geastwood/moduler/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/geastwood/moduler">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="moduler-" class="anchor" href="#moduler-"><span class="octicon octicon-link"></span></a>moduler <a href="https://travis-ci.org/geastwood/tokenlist"><img src="https://travis-ci.org/geastwood/tokenlist.svg?branch=master" alt="Build Status"></a>
+</h1>
+
+<p>A small module manager.</p>
+
+<h2>
+<a name="define-a-module" class="anchor" href="#define-a-module"><span class="octicon octicon-link"></span></a>define a module</h2>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">moduler</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">foo</span><span class="p">);</span> <span class="c1">// setup the foo object to be able to define/require module</span>
+
+<span class="c1">// define a bar module with a simple object</span>
+<span class="nx">foo</span><span class="p">.</span><span class="nx">define</span><span class="p">(</span><span class="s1">'bar'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">'bar'</span><span class="p">,</span>
+        <span class="nx">hi</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s1">'This object\'s name is '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+        <span class="p">};</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="define-a-module-with-multiple-dependencies" class="anchor" href="#define-a-module-with-multiple-dependencies"><span class="octicon octicon-link"></span></a>define a module with multiple dependencies</h2>
+
+<p>It's possible to define a modue with previously defined module.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// suppose there are two modules</span>
+<span class="c1">// module1 and module2 are already defined with foo.define</span>
+<span class="nx">foo</span><span class="p">.</span><span class="nx">define</span><span class="p">(</span><span class="s1">'bar'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">module1</span><span class="p">,</span> <span class="nx">module2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">'bar'</span><span class="p">,</span>
+        <span class="nx">description</span><span class="o">:</span> <span class="s1">'this module has dependencies '</span><span class="nx">module1</span><span class="s1">' and '</span><span class="nx">module2</span><span class="s1">''</span>
+    <span class="p">};</span>
+<span class="p">},</span> <span class="p">[</span><span class="s1">'module1'</span><span class="p">,</span> <span class="s1">'module2'</span><span class="p">]);</span>
+</pre></div>
+
+<h2>
+<a name="define-a-module-that-returns-a-constructor" class="anchor" href="#define-a-module-that-returns-a-constructor"><span class="octicon octicon-link"></span></a>define a module that returns a constructor</h2>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">bar</span><span class="o">:</span> <span class="p">{}</span>
+<span class="p">};</span>
+
+<span class="nx">foo</span><span class="p">.</span><span class="nx">define</span><span class="p">(</span><span class="s1">'Person'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">Person</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{};</span>
+    <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">'John Doe'</span><span class="p">;</span>
+    <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">introduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">'My name is '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="k">return</span> <span class="nx">Person</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="kd">var</span> <span class="nx">dependency</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">require</span><span class="p">([</span><span class="s1">'Person'</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">me</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">dependency</span><span class="p">.</span><span class="nx">Person</span><span class="p">();</span>
+<span class="nx">me</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">'Fei'</span><span class="p">;</span>
+<span class="nx">me</span><span class="p">.</span><span class="nx">introduce</span><span class="p">();</span> <span class="c1">// log 'My name is Fei';</span>
+</pre></div>
+
+<h2>
+<a name="require-fetch-modules" class="anchor" href="#require-fetch-modules"><span class="octicon octicon-link"></span></a>require (fetch) modules</h2>
+
+<p>require a module</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">dependency</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">require</span><span class="p">([</span><span class="s1">'bar'</span><span class="p">]);</span>
+
+<span class="c1">// dependency will an object that containts 'bar' object</span>
+<span class="s1">'bar'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log true</span>
+</pre></div>
+
+<h2>
+<a name="alias" class="anchor" href="#alias"><span class="octicon octicon-link"></span></a>alias</h2>
+
+<p>Use '<strong>as</strong>' to alias a module when using '<strong>require</strong>'</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// providerd that a 'Person' constructor module is already defined</span>
+<span class="c1">// now alias 'Person' as 'P'</span>
+<span class="kd">var</span> <span class="nx">dependency</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">require</span><span class="p">([</span><span class="s1">'Person as P'</span><span class="p">]);</span>
+<span class="s1">'P'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log true</span>
+<span class="s1">'Person'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log false</span>
+</pre></div>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/geastwood">geastwood</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>

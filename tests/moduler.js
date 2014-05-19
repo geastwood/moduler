@@ -54,6 +54,9 @@ describe('static create function', function() {
         it('should have require', function() {
             expect(foo.bar.require).toBeDefined();
         });
+        it('should have setup', function() {
+            expect(foo.bar.setup).toBeDefined();
+        });
     });
 
 });

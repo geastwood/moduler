@@ -83,9 +83,12 @@ var moduler = (function() {
         return resolver.resolve(target, name, {action: 'set', obj: obj});
     };
 
+    var foundation = {};
+
     var moduleManager = function(ns) {
 
         var modules = {};
+        var config = {};
 
         var define = function(name, fn, deps) {
 
@@ -158,8 +161,13 @@ var moduler = (function() {
 
         };
 
+        var setup = function(fn) {
+            fn(config);
+        };
+
         ns.define = define;
         ns.require = require;
+        ns.setup = setup;
 
     };
 
@@ -171,7 +179,12 @@ var moduler = (function() {
         exports: function(target, name, obj) {
             return exports(target, name, obj);
         },
-        extend: function() {}
+        extend: function(fn) {
+            fn(foundation);
+        },
+        debug: function() {
+            console.dir(foundation);
+        }
     };
 
 }());

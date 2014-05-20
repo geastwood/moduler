@@ -1,10 +1,10 @@
-moduler.extend(function(foundation) {
+moduler.extend('util', function(modules) {
     var pluck = function(value) {
         return function(data) {
             return data && data[value];
         };
     };
-    foundation.util = {
+    return {
         pluck: pluck
     };
 });

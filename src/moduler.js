@@ -93,12 +93,19 @@ var moduler = (function() {
         }
     };
 
-    var foundation = {};
+    var foundation = {
+        modules: {},
+        register: function(name, fn, deps) {
+            // resolve deps
+            // export to this.modules.name = fn.apply(null, [deps]);
+            exports(this.modules, name, fn.call(null, this.modules));
+        }
+    };
 
     var moduleManager = function(ns) {
 
         var modules = {};
-        extend(foundation, modules);
+        extend(foundation.modules, modules);
 
         var config = {};
 
@@ -191,8 +198,8 @@ var moduler = (function() {
         exports: function(target, name, obj) {
             return exports(target, name, obj);
         },
-        extend: function(fn) {
-            fn(foundation);
+        extend: function(name, fn) {
+            foundation.register(name, fn);
         },
         debug: function() {
             console.dir(foundation);

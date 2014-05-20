@@ -4,9 +4,9 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
         jasmine: {
-            src: 'src/*.js',
+            src: ['src/moduler.js', 'src/extend_util.js'],
             options: {
-                specs: 'tests/*.js'
+                specs: ['tests/moduler.js', 'tests/extend_util.js']
             }
         },
         watch: {

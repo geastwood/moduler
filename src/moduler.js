@@ -82,12 +82,24 @@ var moduler = (function() {
     var exports = function(target, name, obj) {
         return resolver.resolve(target, name, {action: 'set', obj: obj});
     };
+    var extend = function(source, target) {
+        var key;
+
+        for (key in source) {
+
+            if (source.hasOwnProperty(key)) {
+                target[key] = source[key];
+            }
+        }
+    };
 
     var foundation = {};
 
     var moduleManager = function(ns) {
 
         var modules = {};
+        extend(foundation, modules);
+
         var config = {};
 
         var define = function(name, fn, deps) {

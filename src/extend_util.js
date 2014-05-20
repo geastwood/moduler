@@ -1,8 +1,10 @@
 moduler.extend(function(foundation) {
-    var each = function(obj) {
-        console.log('each method');
+    var pluck = function(value) {
+        return function(data) {
+            return data && data[value];
+        };
     };
-    foundation.ARRAY = {
-        foreach: each
+    foundation.util = {
+        pluck: pluck
     };
 });

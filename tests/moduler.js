@@ -205,3 +205,53 @@ describe('augment object with require', function() {
         expect(baseObject.bar.fn()).toBe('bar should match as well.');
     });
 });
+
+describe('base object when defining module', function() {
+
+    var foo;
+
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+    });
+
+    it('should work', function() {
+        foo.define('bar', function() {
+            expect(this.inherit).toBeDefined();
+            expect(this.constant.set).toBeDefined();
+            this.constant.set('foo', 'foo is a constant');
+            expect(this.constant.get('foo')).toBe('foo is a constant');
+            return {
+                name: 'bar',
+                description: 'should be added to base object',
+                fn: function() {
+                    return this.name + ' should match as well.';
+                }
+            };
+        });
+
+    });
+});
+
+describe('constant of a module', function() {
+    var foo;
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+    });
+
+    it('api', function() {
+        foo.define('foo', function() {
+            expect(this.constant.set).toBeDefined();
+            expect(this.constant.get).toBeDefined();
+            return {};
+        });
+    });
+    it('constant can only be defined once', function() {
+        foo.define('bar', function() {
+            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
+            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
+            return {};
+        });
+    });
+});

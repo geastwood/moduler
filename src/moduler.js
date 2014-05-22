@@ -82,6 +82,22 @@ var moduler = (function() {
     var exports = function(target, name, obj) {
         return resolver.resolve(target, name, {action: 'set', obj: obj});
     };
+
+    var Constant = function() {};
+    Constant.prototype.get = function(name) {
+        return this.name;
+    };
+    Constant.prototype.set = function(name, value) {
+        var status = false;
+        if (typeof this.name === 'undefined') {
+            this.name = value;
+            status = true;
+        } else {
+            console.warn('try to set again the constant: ' + this.name);
+        }
+        return status;
+    };
+
     var extend = function(source, target) {
         var key;
 
@@ -108,6 +124,18 @@ var moduler = (function() {
         extend(foundation.modules, modules);
 
         var config = {};
+        var base = {
+            constant: (function() {
+                var constant = new Constant();
+                return {
+                    get: constant.get,
+                    set: constant.set
+                };
+            }()),
+            inherit: function() {},
+            extend: function() {},
+            each: function() {}
+        };
 
         var define = function(name, fn, deps) {
 
@@ -137,7 +165,7 @@ var moduler = (function() {
 
             }
 
-            exports(modules, name, fn.apply(null, args));
+            exports(modules, name, fn.apply(base, args));
 
         };
 

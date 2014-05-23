@@ -14,7 +14,7 @@ foo.define('bar', function() {
         name: 'bar',
         hi: function() {
             return 'This object\'s name is ' + this.name;
-        };
+        }
     };
 });
 ```

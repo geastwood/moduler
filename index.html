@@ -4,29 +4,40 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Moduler by geastwood</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
   </head>
   <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/geastwood/moduler">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/geastwood/moduler/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/geastwood/moduler/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
     <div class="wrapper">
-      <header>
-        <h1>Moduler</h1>
-        <p>A small module manager.</p>
-        <p class="view"><a href="https://github.com/geastwood/moduler">View the Project on GitHub <small>geastwood/moduler</small></a></p>
-        <ul>
-          <li><a href="https://github.com/geastwood/moduler/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/geastwood/moduler/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/geastwood/moduler">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
+
       <section>
+        <div id="title">
+          <h1>Moduler</h1>
+          <p>A small module manager.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/geastwood">geastwood</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
         <h1>
 <a name="moduler-" class="anchor" href="#moduler-"><span class="octicon octicon-link"></span></a>moduler <a href="https://travis-ci.org/geastwood/tokenlist"><img src="https://travis-ci.org/geastwood/tokenlist.svg?branch=master" alt="Build Status"></a>
 </h1>
@@ -46,6 +57,7 @@
         <span class="nx">hi</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
             <span class="k">return</span> <span class="s1">'This object\'s name is '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
         <span class="p">};</span>
+    <span class="p">};</span>
 <span class="p">});</span>
 </pre></div>
 
@@ -138,11 +150,8 @@
 <span class="s1">'Person'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log false</span>
 </pre></div>
       </section>
+
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/geastwood">geastwood</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>

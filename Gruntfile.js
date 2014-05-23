@@ -30,11 +30,11 @@ module.exports = function(grunt) {
                         outputFile = data.path;
                         fs.writeFileSync(outputFile, amdclean.clean({
                             'filePath': outputFile,
-                            ignoreModules: [],
                             wrap: {
-                                start: 'var moduler = (function() {\n',
-                                end: 'return moduler; \n}());'
-                            }
+                                'start': ';(function() {\n',
+                                'end': '\n}());'
+                            },
+                            globalModules: ['moduler']
                         }));
                     }
                 }

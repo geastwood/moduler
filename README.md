@@ -15,6 +15,7 @@ foo.define('bar', function() {
         hi: function() {
             return 'This object\'s name is ' + this.name;
         };
+    };
 });
 ```
 ## define a module with multiple dependencies

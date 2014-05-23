@@ -23,10 +23,7 @@ module.exports = function(grunt) {
                     optimize: 'none',
                     name: 'moduler',
                     out: 'dist/moduler.js',
-                    wrap: true /*{
-                        startFile: 'build/start.frag',
-                        endFile: 'build/end.frag'
-                    }*/,
+                    wrap: true,
                     onModuleBundleComplete: function (data) {
                         var fs = require('fs'),
                         amdclean = require('amdclean'),
@@ -47,7 +44,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask('test', ['jasmine']);
+    grunt.registerTask('test', ['build', 'jasmine']);
     grunt.registerTask('build', ['requirejs:js']);
     grunt.registerTask('default', 'watch');
 };

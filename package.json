@@ -20,6 +20,8 @@
   },
   "devDependencies": {
     "grunt-contrib-jasmine": "~0.6.3",
-    "grunt-contrib-watch": "~0.6.1"
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-requirejs": "~0.4.4",
+    "amdclean": "~2.0.0"
   }
 }

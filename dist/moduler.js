@@ -1,5 +1,5 @@
 ;(function() {
-var resolver, util, moduler;
+var resolver, util, constant, foundation, moduler;
 (function () {
     resolver = function () {
         var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
@@ -56,36 +56,30 @@ var resolver, util, moduler;
             return Object.prototype.toString.call(obj) === '[object Array]';
         }
     };
-    moduler = function () {
-        
+    constant = function () {
+        var Constant = function () {
+        };
+        Constant.prototype.get = function (name) {
+            return this[name];
+        };
+        Constant.prototype.set = function (name, value) {
+            var status = false;
+            if (typeof this[name] === 'undefined') {
+                this[name] = value;
+                status = true;
+            } else {
+                console.warn('try to set again the constant: ' + this[name]);
+            }
+            return status;
+        };
+        return Constant;
+    }();
+    foundation = function () {
         var exports = function (target, name, obj) {
             return resolver.resolve(target, name, {
                 action: 'set',
                 obj: obj
             });
-        };
-        var Constant = function () {
-        };
-        Constant.prototype.get = function (name) {
-            return this.name;
-        };
-        Constant.prototype.set = function (name, value) {
-            var status = false;
-            if (typeof this.name === 'undefined') {
-                this.name = value;
-                status = true;
-            } else {
-                console.warn('try to set again the constant: ' + this.name);
-            }
-            return status;
-        };
-        var extend = function (source, target) {
-            var key;
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    target[key] = source[key];
-                }
-            }
         };
         var foundation = {
                 modules: {},
@@ -95,6 +89,24 @@ var resolver, util, moduler;
                     exports(this.modules, name, fn.call(null, this.modules));
                 }
             };
+        return foundation;
+    }();
+    moduler = function (Constant) {
+        
+        var exports = function (target, name, obj) {
+            return resolver.resolve(target, name, {
+                action: 'set',
+                obj: obj
+            });
+        };
+        var extend = function (source, target) {
+            var key;
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                }
+            }
+        };
         var moduleManager = function (ns) {
             var modules = {};
             extend(foundation.modules, modules);
@@ -180,7 +192,7 @@ var resolver, util, moduler;
                 console.dir(foundation);
             }
         };
-    }();
+    }(constant);
 }());
 window.moduler = moduler;
 }());

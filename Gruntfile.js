@@ -18,7 +18,6 @@ module.exports = function(grunt) {
         requirejs: {
             js: {
                 options: {
-                    mainConfigFile: 'build/config.js',
                     baseUrl: 'src',
                     optimize: 'none',
                     name: 'moduler',

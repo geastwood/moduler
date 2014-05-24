@@ -1,24 +1,9 @@
-define(['resolver', 'util'], function(resolver, util) {
+define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, Constant, foundation) {
 
     'use strict';
 
     var exports = function(target, name, obj) {
         return resolver.resolve(target, name, {action: 'set', obj: obj});
-    };
-
-    var Constant = function() {};
-    Constant.prototype.get = function(name) {
-        return this.name;
-    };
-    Constant.prototype.set = function(name, value) {
-        var status = false;
-        if (typeof this.name === 'undefined') {
-            this.name = value;
-            status = true;
-        } else {
-            console.warn('try to set again the constant: ' + this.name);
-        }
-        return status;
     };
 
     var extend = function(source, target) {
@@ -29,15 +14,6 @@ define(['resolver', 'util'], function(resolver, util) {
             if (source.hasOwnProperty(key)) {
                 target[key] = source[key];
             }
-        }
-    };
-
-    var foundation = {
-        modules: {},
-        register: function(name, fn, deps) {
-            // resolve deps
-            // export to this.modules.name = fn.apply(null, [deps]);
-            exports(this.modules, name, fn.call(null, this.modules));
         }
     };
 

@@ -1,3 +1,8 @@
+/**
+ * resolver
+ * use to resolve namespaces
+ * set or get object for namespaces
+ */
 define(function() {
 
     var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
@@ -63,10 +68,15 @@ define(function() {
         return (alias) ? alias[1] : name;
     }
 
+    function exports(target, name, obj) {
+        return resolve(target, name, {action: 'set', obj: obj});
+    }
+
     return {
         resolve: resolve,
         moduleName: moduleName,
-        aliasName: aliasName
+        aliasName: aliasName,
+        'exports': exports
     };
 
 });

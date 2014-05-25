@@ -45,23 +45,46 @@ var resolver, util, constant, foundation, moduler;
             var alias = MODULE_ALIAS_REGEX.exec(name);
             return alias ? alias[1] : name;
         }
+        function exports(target, name, obj) {
+            return resolve(target, name, {
+                action: 'set',
+                obj: obj
+            });
+        }
         return {
             resolve: resolve,
             moduleName: moduleName,
-            aliasName: aliasName
+            aliasName: aliasName,
+            'exports': exports
         };
     }();
-    util = {
-        isArray: function (obj) {
+    util = function () {
+        var isArray = function (obj) {
             return Object.prototype.toString.call(obj) === '[object Array]';
-        }
-    };
+        };
+        return { isArray: isArray };
+    }();
     constant = function () {
+        /**
+         * Constant constructor function
+         *
+         * @return object
+         */
         var Constant = function () {
         };
+        /**
+         * getter
+         *
+         * @return mixed
+         */
         Constant.prototype.get = function (name) {
             return this[name];
         };
+        /**
+         * Setter
+         *
+         * @return boolean
+         */
         Constant.prototype.set = function (name, value) {
             var status = false;
             if (typeof this[name] === 'undefined') {
@@ -75,30 +98,18 @@ var resolver, util, constant, foundation, moduler;
         return Constant;
     }();
     foundation = function () {
-        var exports = function (target, name, obj) {
-            return resolver.resolve(target, name, {
-                action: 'set',
-                obj: obj
-            });
-        };
         var foundation = {
                 modules: {},
                 register: function (name, fn, deps) {
                     // resolve deps
                     // export to this.modules.name = fn.apply(null, [deps]);
-                    exports(this.modules, name, fn.call(null, this.modules));
+                    resolver.exports(this.modules, name, fn.call(null, this.modules));
                 }
             };
         return foundation;
     }();
     moduler = function (Constant) {
         
-        var exports = function (target, name, obj) {
-            return resolver.resolve(target, name, {
-                action: 'set',
-                obj: obj
-            });
-        };
         var extend = function (source, target) {
             var key;
             for (key in source) {
@@ -143,7 +154,7 @@ var resolver, util, constant, foundation, moduler;
                     }
                     args.push(aModule);
                 }
-                exports(modules, name, fn.apply(base, args));
+                resolver.exports(modules, name, fn.apply(base, args));
             };
             var require = function (deps, options) {
                 if (!util.isArray(deps)) {
@@ -183,7 +194,7 @@ var resolver, util, constant, foundation, moduler;
                 return moduleManager(ns);
             },
             exports: function (target, name, obj) {
-                return exports(target, name, obj);
+                return resolver.exports(target, name, obj);
             },
             extend: function (name, fn) {
                 foundation.register(name, fn);

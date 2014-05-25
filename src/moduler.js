@@ -2,10 +2,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     'use strict';
 
-    var exports = function(target, name, obj) {
-        return resolver.resolve(target, name, {action: 'set', obj: obj});
-    };
-
     var extend = function(source, target) {
         var key;
 
@@ -64,7 +60,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
             }
 
-            exports(modules, name, fn.apply(base, args));
+            resolver.exports(modules, name, fn.apply(base, args));
 
         };
 
@@ -123,7 +119,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             return moduleManager(ns);
         },
         exports: function(target, name, obj) {
-            return exports(target, name, obj);
+            return resolver.exports(target, name, obj);
         },
         extend: function(name, fn) {
             foundation.register(name, fn);

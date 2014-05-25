@@ -23,6 +23,8 @@ define(function() {
         if (hasSubmodule) {
 
             target[parse[1]] = target[parse[1]] || {};
+
+            // recursively solve the namespace
             return resolve(target[parse[1]], parse[2], options);
         }
 
@@ -43,6 +45,11 @@ define(function() {
 
     }
 
+    /**
+     * resolve module name
+     *
+     * @return string
+     */
     function moduleName(name) {
 
         var alias = MODULE_ALIAS_REGEX.exec(name);
@@ -63,15 +70,24 @@ define(function() {
         }
     }
 
+    /**
+     * Resolve alias name
+     *
+     * @return string
+     */
     function aliasName(name) {
         var alias = MODULE_ALIAS_REGEX.exec(name);
         return (alias) ? alias[1] : name;
     }
 
+    /**
+     * exports function, delegate to set action of resolve function
+     */
     function exports(target, name, obj) {
         return resolve(target, name, {action: 'set', obj: obj});
     }
 
+    // api
     return {
         resolve: resolve,
         moduleName: moduleName,

@@ -218,6 +218,8 @@ describe('base object when defining module', function() {
     it('should work', function() {
         foo.define('bar', function() {
             expect(this.inherit).toBeDefined();
+            expect(this.each).toBeDefined();
+            expect(this.extend).toBeDefined();
             expect(this.constant.set).toBeDefined();
             this.constant.set('foo', 'foo is a constant');
             expect(this.constant.get('foo')).toBe('foo is a constant');

@@ -2,21 +2,11 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     'use strict';
 
-    var extend = function(source, target) {
-        var key;
-
-        for (key in source) {
-
-            if (source.hasOwnProperty(key)) {
-                target[key] = source[key];
-            }
-        }
-    };
-
     var moduleManager = function(ns) {
 
         var modules = {};
-        extend(foundation.modules, modules);
+
+        util.extend(foundation.modules, modules);
 
         var config = {};
         var base = {
@@ -27,9 +17,10 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
                     set: constant.set
                 };
             }()),
-            inherit: function() {},
-            extend: function() {},
-            each: function() {}
+            inherit: util.inherit,
+            extend: util.extend,
+            each: util.each,
+            exports: util.exports
         };
 
         var define = function(name, fn, deps) {

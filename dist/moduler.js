@@ -14,6 +14,7 @@ var resolver, util, constant, foundation, moduler;
             hasSubmodule = parse !== null;
             if (hasSubmodule) {
                 target[parse[1]] = target[parse[1]] || {};
+                // recursively solve the namespace
                 return resolve(target[parse[1]], parse[2], options);
             }
             if (options.action === 'get') {
@@ -28,6 +29,11 @@ var resolver, util, constant, foundation, moduler;
                 throw new Error('Failed to resolve.');
             }
         }
+        /**
+         * resolve module name
+         *
+         * @return string
+         */
         function moduleName(name) {
             var alias = MODULE_ALIAS_REGEX.exec(name);
             var submodules;
@@ -41,16 +47,25 @@ var resolver, util, constant, foundation, moduler;
                 return name;
             }
         }
+        /**
+         * Resolve alias name
+         *
+         * @return string
+         */
         function aliasName(name) {
             var alias = MODULE_ALIAS_REGEX.exec(name);
             return alias ? alias[1] : name;
         }
+        /**
+         * exports function, delegate to set action of resolve function
+         */
         function exports(target, name, obj) {
             return resolve(target, name, {
                 action: 'set',
                 obj: obj
             });
         }
+        // api
         return {
             resolve: resolve,
             moduleName: moduleName,
@@ -59,10 +74,64 @@ var resolver, util, constant, foundation, moduler;
         };
     }();
     util = function () {
-        var isArray = function (obj) {
+        var nativeForEach = Array.prototype.forEach;
+        function each(obj, iterator, context) {
+            if (obj == null) {
+                return obj;
+            }
+            if (nativeForEach && obj.forEach === nativeForEach) {
+                obj.forEach(iterator, context);
+            } else if (obj.length === +obj.length) {
+                for (var i = 0, length = obj.length; i < length; i++) {
+                    iterator.call(context, obj[i], i, obj);
+                }
+            } else {
+                for (var key in obj) {
+                    iterator.call(context, obj[key], key, obj);
+                }
+            }
+            return obj;
+        }
+        /**
+         * Inherit constructors
+         *
+         * @param function Child Child constructor function, if null specified, constructor will be empty fn
+         * @param function Parent Parent construtor to inherit from
+         *
+         * @return function Child constructor
+         */
+        function inherit(Child, Parent) {
+            if (!Parent || typeof Parent !== 'function') {
+                throw new Error('Second parameter expects to be a constructor function');
+            }
+            if (Child === null) {
+                Child = function () {
+                };
+            }
+            var F = function () {
+            };
+            F.prototype = Parent.prototype;
+            Child.prototype = new F();
+            Child.prototype.constructor = Child;
+            return Child;
+        }
+        function extend(source, target) {
+            var key;
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        function isArray(obj) {
             return Object.prototype.toString.call(obj) === '[object Array]';
+        }
+        return {
+            isArray: isArray,
+            each: each,
+            inherit: inherit,
+            extend: extend
         };
-        return { isArray: isArray };
     }();
     constant = function () {
         /**
@@ -111,17 +180,9 @@ var resolver, util, constant, foundation, moduler;
     }();
     moduler = function (Constant) {
         
-        var extend = function (source, target) {
-            var key;
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    target[key] = source[key];
-                }
-            }
-        };
         var moduleManager = function (ns) {
             var modules = {};
-            extend(foundation.modules, modules);
+            util.extend(foundation.modules, modules);
             var config = {};
             var base = {
                     constant: function () {
@@ -131,12 +192,10 @@ var resolver, util, constant, foundation, moduler;
                             set: constant.set
                         };
                     }(),
-                    inherit: function () {
-                    },
-                    extend: function () {
-                    },
-                    each: function () {
-                    }
+                    inherit: util.inherit,
+                    extend: util.extend,
+                    each: util.each,
+                    exports: util.exports
                 };
             var define = function (name, fn, deps) {
                 var args = [], i, len, dep, aModule;

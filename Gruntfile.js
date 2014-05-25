@@ -3,14 +3,16 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         jasmine: {
-            src: ['dist/moduler.js', 'src/extend_util.js'],
+            src: ['dist/moduler.js', 'extensions/*.js'],
             options: {
                 specs: ['tests/moduler.js', 'tests/extend_util.js']
             }
         },
         watch: {
             scripts: {
-                files: ['src/*.js', 'tests/*.js'],
+                files: ['src/*.js',
+                        'extensions/*.js',
+                        'tests/*.js'],
                 tasks: ['build', 'jasmine']
             }
         },

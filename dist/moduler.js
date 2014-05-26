@@ -87,7 +87,9 @@ var resolver, util, constant, foundation, moduler;
                 }
             } else {
                 for (var key in obj) {
-                    iterator.call(context, obj[key], key, obj);
+                    if (obj.hasOwnProperty(key)) {
+                        iterator.call(context, obj[key], key, obj);
+                    }
                 }
             }
             return obj;

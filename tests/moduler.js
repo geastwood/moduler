@@ -206,6 +206,29 @@ describe('augment object with require', function() {
     });
 });
 
+describe('constant of a module', function() {
+    var foo;
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+    });
+
+    it('api', function() {
+        foo.define('foo', function() {
+            expect(this.constant.set).toBeDefined();
+            expect(this.constant.get).toBeDefined();
+            return {};
+        });
+    });
+    it('constant can only be defined once', function() {
+        foo.define('bar', function() {
+            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
+            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
+            return {};
+        });
+    });
+});
+
 describe('base object when defining module', function() {
 
     var foo;
@@ -234,26 +257,57 @@ describe('base object when defining module', function() {
 
     });
 });
+describe('base object\'s each method', function() {
 
-describe('constant of a module', function() {
     var foo;
+
     beforeEach(function() {
         foo = {};
         moduler.create(foo);
     });
 
-    it('api', function() {
-        foo.define('foo', function() {
-            expect(this.constant.set).toBeDefined();
-            expect(this.constant.get).toBeDefined();
-            return {};
+    it('handle null', function() {
+        foo.define('bar', function() {
+            delete Array.prototype.forEach;
+            var count = 0;
+            this.each(null, function(v, i) {
+                ++count;
+            });
+            expect(count).toBe(0);
         });
     });
-    it('constant can only be defined once', function() {
+    it('simple each for array', function() {
         foo.define('bar', function() {
-            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
-            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
-            return {};
+            delete Array.prototype.forEach;
+            var arr = [1, 2, 3, 4];
+            var rst = [];
+            this.each(arr, function(v, i) {
+                rst[i] = v * 2;
+            });
+            expect(rst).toEqual([2, 4, 6, 8]);
+        });
+    });
+    it('simple each with context for array', function() {
+        foo.define('bar', function() {
+            delete Array.prototype.forEach;
+            var arr = [1, 2, 3, 4];
+            var rst = [];
+            this.each(arr, function(v, i) {
+                rst[i] = v * this.factor;
+            }, {factor: 3});
+            expect(rst).toEqual([3, 6, 9, 12]);
+        });
+    });
+    it('simple each with context for object', function() {
+        foo.define('bar', function() {
+            delete Array.prototype.forEach;
+            var arr = {foo: 'f', bar: 'b', fb: 'bf'};
+            var rst = {};
+            rst.constructor.prototype.baz = 'baz';
+            this.each(arr, function(v, i) {
+                rst[i] = v + 'oo';
+            });
+            expect(rst).toEqual({foo: 'foo', bar: 'boo', fb: 'bfoo'});
         });
     });
 });

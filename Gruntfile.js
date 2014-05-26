@@ -5,7 +5,9 @@ module.exports = function(grunt) {
         jasmine: {
             src: ['dist/moduler.js', 'extensions/*.js'],
             options: {
-                specs: ['tests/moduler.js', 'tests/extend_util.js']
+                specs: ['tests/moduler.js',
+                        'tests/extend_util.js',
+                        'tests/base.js']
             }
         },
         watch: {

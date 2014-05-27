@@ -6,7 +6,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
         var modules = {};
 
-        util.extend(foundation.modules, modules);
+        util.mixin(modules, foundation.modules);
 
         var config = {};
         var base = {
@@ -18,7 +18,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
                 };
             }()),
             inherit: util.inherit,
-            extend: util.extend,
+            mixin: util.mixin,
             each: util.each,
             exports: util.exports
         };

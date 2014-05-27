@@ -11,7 +11,7 @@ describe('base object when defining module', function() {
         foo.define('bar', function() {
             expect(this.inherit).toBeDefined();
             expect(this.each).toBeDefined();
-            expect(this.extend).toBeDefined();
+            expect(this.mixin).toBeDefined();
             expect(this.constant.set).toBeDefined();
             this.constant.set('foo', 'foo is a constant');
             expect(this.constant.get('foo')).toBe('foo is a constant');
@@ -127,3 +127,74 @@ describe('base object\'s inherit method', function() {
     });
 
 });
+
+describe('base object\'s mixin method', function() {
+
+    var foo, People;
+    var obj1 = {
+        foo: 'foo',
+        bar: 'bar',
+        fb: {
+            bf: 'bf'
+        }
+    };
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+        People = function() {};
+        People.prototype.breath = 'air';
+        People.prototype.talk = function(thing) {
+            return thing;
+        };
+    });
+    it('should work with shadow copy', function() {
+        foo.define('bar', function() {
+            var obj1 = {
+                foo: 'foo',
+                bar: 'bar',
+                fb: {
+                    bf: 'bf'
+                }
+            };
+            var obj2 = this.mixin({}, obj1);
+            obj1.fb.bf = 'changed';
+            expect(obj2.fb.bf).toBe('changed');
+            obj2.fb.bf = 'changed by obj2';
+            expect(obj1.fb.bf).toBe('changed by obj2');
+        });
+    });
+    it('should work with deep copy', function() {
+        foo.define('bar', function() {
+            var obj1 = {
+                foo: 'foo',
+                bar: 'bar',
+                fb: {
+                    bf: 'bf'
+                }
+            };
+            var obj2 = this.mixin({}, obj1, false, true);
+            obj1.fb.bf = 'changed';
+            expect(obj2.fb.bf).toBe('bf');
+            obj2.fb.bf = 'changed by obj2';
+            expect(obj1.fb.bf).toBe('changed');
+        });
+    });
+    it('should work with force flag', function() {
+        foo.define('bar', function() {
+            var obj1 = {
+                foo: 'foo',
+                bar: 'bar',
+                fb: {
+                    bf: 'bf'
+                }
+            };
+            var obj2 = {
+                foo: 'foo in obj2'
+            };
+            this.mixin(obj2, obj1, false);
+            expect(obj2.foo).toBe('foo');
+        });
+    });
+
+});
+

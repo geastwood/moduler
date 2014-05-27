@@ -1,28 +1,64 @@
 define(function() {
 
+    var hasOwn = Object.prototype.hasOwnProperty;
+    var ostring = Object.prototype.toString;
     var nativeForEach = Array.prototype.forEach;
 
-    function each(obj, iterator, context) {
+    function hasProp(obj, prop) {
+        hasOwn.call(obj, prop);
+    }
 
+    function isArray(obj) {
+        return ostring.call(obj) === '[object Array]';
+    }
+
+    function isFunction(fn) {
+        return ostring.call(fn) === '[object Function]';
+    }
+
+    function each(obj, fn, context) {
+
+        /* jshint eqnull:true */
         if (obj == null) {
             return obj;
         }
 
         if (nativeForEach && obj.forEach === nativeForEach) {
-            obj.forEach(iterator, context);
+            obj.forEach(fn, context);
         } else if (obj.length === +obj.length) {
             for (var i = 0, length = obj.length; i < length; i++) {
-                iterator.call(context, obj[i], i, obj);
+                fn.call(context, obj[i], i, obj);
             }
         } else {
             for (var key in obj) {
                 if (obj.hasOwnProperty(key)) {
-                    iterator.call(context, obj[key], key, obj);
+                    fn.call(context, obj[key], key, obj);
                 }
             }
         }
 
         return obj;
+    }
+
+    function mixin(target, source, force, deepStringMixin) {
+        if (source) {
+            each(source, function (value, prop) {
+                if (force || !hasProp(target, prop)) {
+                    if (deepStringMixin && typeof value === 'object' && value &&
+                        !isArray(value) && !isFunction(value) &&
+                        !(value instanceof RegExp)) {
+
+                        if (!target[prop]) {
+                            target[prop] = {};
+                        }
+                        mixin(target[prop], value, force, deepStringMixin);
+                    } else {
+                        target[prop] = value;
+                    }
+                }
+            });
+        }
+        return target;
     }
 
     /**
@@ -51,25 +87,10 @@ define(function() {
         return Child;
     }
 
-    function extend(source, target) {
-        var key;
-
-        for (key in source) {
-
-            if (source.hasOwnProperty(key)) {
-                target[key] = source[key];
-            }
-        }
-    }
-
-    function isArray(obj) {
-        return Object.prototype.toString.call(obj) === '[object Array]';
-    }
-
     return {
         isArray: isArray,
         each: each,
         inherit: inherit,
-        extend: extend
+        mixin: mixin
     };
 });

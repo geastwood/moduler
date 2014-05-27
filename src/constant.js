@@ -36,4 +36,5 @@ define(function() {
     };
 
     return Constant;
+
 });

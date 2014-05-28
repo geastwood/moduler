@@ -198,3 +198,46 @@ describe('base object\'s mixin method', function() {
 
 });
 
+describe('base object\'s create method', function() {
+    var foo, People;
+
+    beforeEach(function() {
+        foo = {};
+        moduler.create(foo);
+        People = function() {};
+        People.prototype.breath = 'air';
+        People.prototype.talk = function(thing) {
+            return thing + '.';
+        };
+    });
+
+    it('should work with simple extend', function() {
+
+        foo.define('bar', function() {
+            var peopleCreator = this.extendCtor(People);
+            var template = {name: 'foo', age: 20, skills:['java', 'php']};
+            var p1 = peopleCreator(template);
+            expect(p1.breath).toBe('air');
+            expect(p1.name).toBe('foo');
+            expect(p1.age).toBe(20);
+            template.skills[0] = 'javascript';
+            expect(p1.skills[0]).toBe('javascript');
+            expect(p1.talk('something')).toBe('something.');
+        });
+    });
+
+    it('should work with deep extend', function() {
+
+        foo.define('bar', function() {
+            var peopleCreator = this.extendCtor(People);
+            var template = {name: 'foo', age: 20, skills:['java', 'php']};
+            var p1 = peopleCreator(template, true);
+            expect(p1.breath).toBe('air');
+            expect(p1.name).toBe('foo');
+            expect(p1.age).toBe(20);
+            template.skills[0] = 'javascript';
+            expect(p1.skills[0]).toBe('java');
+            expect(p1.talk('something')).toBe('something.');
+        });
+    });
+});

@@ -110,9 +110,13 @@ var resolver, util, constant, foundation, moduler;
             if (source) {
                 each(source, function (value, prop) {
                     if (force || !hasProp(target, prop)) {
-                        if (deepStringMixin && typeof value === 'object' && value && !isArray(value) && !isFunction(value) && !(value instanceof RegExp)) {
+                        if (deepStringMixin && typeof value === 'object' && value && !isFunction(value) && !(value instanceof RegExp)) {
                             if (!target[prop]) {
-                                target[prop] = {};
+                                if (isArray(value)) {
+                                    target[prop] = [];
+                                } else {
+                                    target[prop] = {};
+                                }
                             }
                             mixin(target[prop], value, force, deepStringMixin);
                         } else {
@@ -146,11 +150,20 @@ var resolver, util, constant, foundation, moduler;
             Child.prototype.constructor = Child;
             return Child;
         }
+        // extend constructor function
+        function extendCtor(Ctor) {
+            return function (obj, deep) {
+                var o = new Ctor();
+                mixin(o, obj, false, deep);
+                return o;
+            };
+        }
         return {
             isArray: isArray,
             each: each,
             inherit: inherit,
-            mixin: mixin
+            mixin: mixin,
+            extendCtor: extendCtor
         };
     }();
     constant = function () {
@@ -215,7 +228,8 @@ var resolver, util, constant, foundation, moduler;
                     inherit: util.inherit,
                     mixin: util.mixin,
                     each: util.each,
-                    exports: util.exports
+                    exports: util.exports,
+                    extendCtor: util.extendCtor
                 };
             var define = function (name, fn, deps) {
                 var args = [], i, len, dep, aModule;

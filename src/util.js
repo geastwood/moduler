@@ -41,15 +41,23 @@ define(function() {
     }
 
     function mixin(target, source, force, deepStringMixin) {
+
         if (source) {
+
             each(source, function (value, prop) {
+
                 if (force || !hasProp(target, prop)) {
+
                     if (deepStringMixin && typeof value === 'object' && value &&
-                        !isArray(value) && !isFunction(value) &&
+                        !isFunction(value) &&
                         !(value instanceof RegExp)) {
 
                         if (!target[prop]) {
-                            target[prop] = {};
+                            if (isArray(value)) {
+                                target[prop] = [];
+                            } else {
+                                target[prop] = {};
+                            }
                         }
                         mixin(target[prop], value, force, deepStringMixin);
                     } else {
@@ -87,10 +95,21 @@ define(function() {
         return Child;
     }
 
+    // extend constructor function
+    function extendCtor(Ctor) {
+
+        return function(obj, deep) {
+            var o = new Ctor();
+            mixin(o, obj, false, deep);
+            return o;
+        };
+    }
+
     return {
         isArray: isArray,
         each: each,
         inherit: inherit,
-        mixin: mixin
+        mixin: mixin,
+        extendCtor: extendCtor
     };
 });

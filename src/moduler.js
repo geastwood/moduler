@@ -20,7 +20,8 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             inherit: util.inherit,
             mixin: util.mixin,
             each: util.each,
-            exports: util.exports
+            exports: util.exports,
+            extendCtor: util.extendCtor
         };
 
         var define = function(name, fn, deps) {

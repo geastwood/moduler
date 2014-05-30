@@ -65,11 +65,31 @@ var resolver, util, constant, foundation, moduler;
                 obj: obj
             });
         }
+        /**
+         * Attach deps from source to target
+         *
+         * @return object target object
+         */
+        function attach(source, target, deps) {
+            var i, len, dep, resolvedName;
+            target = target || {};
+            for (i = 0, len = deps.length; i < len; i++) {
+                dep = deps[i];
+                // resolve the dependency name, parse deep namespace or alias
+                resolvedName = moduleName(dep);
+                // assign resolved module to resolved name
+                target[resolvedName] = resolve(source, aliasName(dep), { action: 'get' });
+                // give warning if the resolved module is empty
+                if (typeof target[resolvedName] === 'undefined') {
+                    console.warn('module with the name "' + dep + '" is not found.');
+                }
+            }
+            return target;
+        }
         // api
         return {
             resolve: resolve,
-            moduleName: moduleName,
-            aliasName: aliasName,
+            attach: attach,
             'exports': exports
         };
     }();
@@ -217,6 +237,7 @@ var resolver, util, constant, foundation, moduler;
             var modules = {};
             util.mixin(modules, foundation.modules);
             var config = {};
+            // will be bind with 'this' when defining modules
             var base = {
                     constant: function () {
                         var constant = new Constant();
@@ -255,25 +276,8 @@ var resolver, util, constant, foundation, moduler;
                     throw new Error('Dependencies must be supplied as an array.');
                 }
                 options = options || {};
-                // resove dependencies
-                function resolve(target, deps) {
-                    var i, len, dep, resolvedName;
-                    target = target || {};
-                    for (i = 0, len = deps.length; i < len; i++) {
-                        dep = deps[i];
-                        // resolve the dependency name, parse deep namespace or alias
-                        resolvedName = resolver.moduleName(dep);
-                        // assign resolved module to resolved name
-                        target[resolvedName] = resolver.resolve(modules, resolver.aliasName(dep), { action: 'get' });
-                        // give warning if the resolved module is empty
-                        if (typeof target[resolvedName] === 'undefined') {
-                            console.warn('module with the name "' + dep + '" is not found.');
-                        }
-                    }
-                    return target;
-                }
                 // we resovle currently empty object, if necessary we can augment exist module
-                return resolve(options.base || {}, deps);
+                return resolver.attach(modules, options.base || {}, deps);
             };
             var setup = function (fn) {
                 fn(config);

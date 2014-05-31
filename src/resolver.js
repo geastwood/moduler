@@ -8,6 +8,9 @@ define(function() {
     var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
     var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
 
+    /**
+     * Resolve namespace with "get" or "set" methods
+     */
     function resolve(target, name, options) {
 
         var parse, hasSubmodule;

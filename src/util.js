@@ -16,6 +16,11 @@ define(function() {
         return ostring.call(fn) === '[object Function]';
     }
 
+    /**
+     * each, forEach implementation
+     *
+     * @return object Looping object
+     */
     function each(obj, fn, context) {
 
         /* jshint eqnull:true */
@@ -40,6 +45,11 @@ define(function() {
         return obj;
     }
 
+    /**
+     * Mixin/extend implementation
+     *
+     * @return object target object
+     */
     function mixin(target, source, force, deepStringMixin) {
 
         if (source) {
@@ -48,6 +58,7 @@ define(function() {
 
                 if (force || !hasProp(target, prop)) {
 
+                    // if deep copy, perform recursive call
                     if (deepStringMixin && typeof value === 'object' && value &&
                         !isFunction(value) &&
                         !(value instanceof RegExp)) {
@@ -59,6 +70,8 @@ define(function() {
                                 target[prop] = {};
                             }
                         }
+
+                        // recursive
                         mixin(target[prop], value, force, deepStringMixin);
                     } else {
                         target[prop] = value;
@@ -66,6 +79,7 @@ define(function() {
                 }
             });
         }
+
         return target;
     }
 
@@ -105,6 +119,7 @@ define(function() {
         };
     }
 
+    // api
     return {
         isArray: isArray,
         each: each,

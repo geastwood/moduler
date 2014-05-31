@@ -6,6 +6,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
         var modules = {};
 
+        // augument default "modules" object with foundation's methods
         util.mixin(modules, foundation.modules);
 
         var config = {};

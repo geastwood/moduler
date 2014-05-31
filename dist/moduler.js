@@ -4,6 +4,9 @@ var resolver, util, constant, foundation, moduler;
     resolver = function () {
         var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
         var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
+        /**
+         * Resolve namespace with "get" or "set" methods
+         */
         function resolve(target, name, options) {
             var parse, hasSubmodule;
             options = options || { action: 'get' };
@@ -106,6 +109,11 @@ var resolver, util, constant, foundation, moduler;
         function isFunction(fn) {
             return ostring.call(fn) === '[object Function]';
         }
+        /**
+         * each, forEach implementation
+         *
+         * @return object Looping object
+         */
         function each(obj, fn, context) {
             /* jshint eqnull:true */
             if (obj == null) {
@@ -126,10 +134,16 @@ var resolver, util, constant, foundation, moduler;
             }
             return obj;
         }
+        /**
+         * Mixin/extend implementation
+         *
+         * @return object target object
+         */
         function mixin(target, source, force, deepStringMixin) {
             if (source) {
                 each(source, function (value, prop) {
                     if (force || !hasProp(target, prop)) {
+                        // if deep copy, perform recursive call
                         if (deepStringMixin && typeof value === 'object' && value && !isFunction(value) && !(value instanceof RegExp)) {
                             if (!target[prop]) {
                                 if (isArray(value)) {
@@ -138,6 +152,7 @@ var resolver, util, constant, foundation, moduler;
                                     target[prop] = {};
                                 }
                             }
+                            // recursive
                             mixin(target[prop], value, force, deepStringMixin);
                         } else {
                             target[prop] = value;
@@ -178,6 +193,7 @@ var resolver, util, constant, foundation, moduler;
                 return o;
             };
         }
+        // api
         return {
             isArray: isArray,
             each: each,
@@ -235,6 +251,7 @@ var resolver, util, constant, foundation, moduler;
         
         var moduleManager = function (ns) {
             var modules = {};
+            // augument default "modules" object with foundation's methods
             util.mixin(modules, foundation.modules);
             var config = {};
             // will be bind with 'this' when defining modules

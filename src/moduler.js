@@ -29,33 +29,18 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
         var define = function(name, fn, deps) {
 
-            var args = [], i, len, dep, aModule;
+            var args;
+            deps = deps || [];
 
             if (!name) {
                 throw new Error('Module name is required when defining a module.');
             }
 
-            deps = deps || [];
-
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
 
-            //args = resolver.resolveDeps(deps);
-
-            for (i = 0, len = deps.length; i < len; i++) {
-
-                dep = deps[i];
-
-                aModule = resolver.resolve(modules, dep, {action: 'get'});
-
-                if (!aModule) {
-                    console.warn('Fail to inject dependency named: "' + dep + '".');
-                }
-
-                args.push(aModule);
-
-            }
+            args = resolver.resolveDeps(modules, deps);
 
             resolver.exports(modules, name, fn.apply(base, args));
 
@@ -70,7 +55,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             options = options || {};
 
             // we resovle currently empty object, if necessary we can augment exist module
-            return resolver.attach(modules, options.base || {}, deps);
+            return resolver.attach(modules, deps, options.base || {});
 
         };
 

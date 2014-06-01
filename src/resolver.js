@@ -90,60 +90,48 @@ define(function() {
         return resolve(target, name, {action: 'set', obj: obj});
     }
 
-    /**
-     * Attach deps from source to target
-     *
-     * @return object target object
-     */
-    function attach(source, target, deps) {
+    function resolveDeps(source, deps, target) {
 
-        var i, len, dep, resolvedName;
-        target = target || {};
+        var i, len, dep, resolvedName, aModule;
+
+        var rtn = target ? target : [];
 
         for (i = 0, len = deps.length; i < len; i++) {
 
             dep = deps[i];
-
-            // resolve the dependency name, parse deep namespace or alias
-            resolvedName = nameService.module(dep);
-
-            // assign resolved module to resolved name
-            // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-            target[resolvedName] = resolve(source, nameService.stripAlias(dep), {action: 'get'});
+            aModule = resolve(source, nameService.stripAlias(dep), {action: 'get'});
 
             // give warning if the resolved module is empty
-            if (typeof target[resolvedName] === 'undefined') {
+            if (typeof aModule === 'undefined') {
                 console.warn('module with the name "' + dep + '" is not found.');
+                aModule = null;
             }
+
+            if (target) {
+
+                // resolve the dependency name, parse deep namespace or alias
+                // here considers the alias
+                resolvedName = nameService.module(dep);
+
+                // assign resolved module to resolved name
+                // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
+                target[resolvedName] = resolve(source, nameService.stripAlias(dep), {action: 'get'});
+
+            } else {
+                rtn.push(aModule);
+            }
+
 
         }
 
-        /*
-
-        for (i = 0, len = deps.length; i < len; i++) {
-
-            dep = deps[i];
-
-            aModule = resolver.resolve(modules, dep, {action: 'get'});
-
-            if (!aModule) {
-                console.warn('Fail to inject dependency named: "' + dep + '".');
-            }
-
-            args.push(aModule);
-
-        }
-
-        */
-
-        return target;
+        return rtn;
     }
 
     // api
     return {
         resolve: resolve,
-        /*resolveDep: resolveDep,*/
-        attach: attach,
+        resolveDeps: resolveDeps,
+        attach: resolveDeps,
         exports: exports
     };
 

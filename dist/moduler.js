@@ -68,50 +68,35 @@ var resolver, util, constant, foundation, moduler;
                 obj: obj
             });
         }
-        /**
-         * Attach deps from source to target
-         *
-         * @return object target object
-         */
-        function attach(source, target, deps) {
-            var i, len, dep, resolvedName;
-            target = target || {};
+        function resolveDeps(source, deps, target) {
+            var i, len, dep, resolvedName, aModule;
+            var rtn = target ? target : [];
             for (i = 0, len = deps.length; i < len; i++) {
                 dep = deps[i];
-                // resolve the dependency name, parse deep namespace or alias
-                resolvedName = nameService.module(dep);
-                // assign resolved module to resolved name
-                // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-                target[resolvedName] = resolve(source, nameService.stripAlias(dep), { action: 'get' });
+                aModule = resolve(source, nameService.stripAlias(dep), { action: 'get' });
                 // give warning if the resolved module is empty
-                if (typeof target[resolvedName] === 'undefined') {
+                if (typeof aModule === 'undefined') {
                     console.warn('module with the name "' + dep + '" is not found.');
+                    aModule = null;
+                }
+                if (target) {
+                    // resolve the dependency name, parse deep namespace or alias
+                    // here considers the alias
+                    resolvedName = nameService.module(dep);
+                    // assign resolved module to resolved name
+                    // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
+                    target[resolvedName] = resolve(source, nameService.stripAlias(dep), { action: 'get' });
+                } else {
+                    rtn.push(aModule);
                 }
             }
-            /*
-            
-                    for (i = 0, len = deps.length; i < len; i++) {
-            
-                        dep = deps[i];
-            
-                        aModule = resolver.resolve(modules, dep, {action: 'get'});
-            
-                        if (!aModule) {
-                            console.warn('Fail to inject dependency named: "' + dep + '".');
-                        }
-            
-                        args.push(aModule);
-            
-                    }
-            
-                    */
-            return target;
+            return rtn;
         }
         // api
         return {
             resolve: resolve,
-            /*resolveDep: resolveDep,*/
-            attach: attach,
+            resolveDeps: resolveDeps,
+            attach: resolveDeps,
             exports: exports
         };
     }();
@@ -289,23 +274,15 @@ var resolver, util, constant, foundation, moduler;
                     extendCtor: util.extendCtor
                 };
             var define = function (name, fn, deps) {
-                var args = [], i, len, dep, aModule;
+                var args;
+                deps = deps || [];
                 if (!name) {
                     throw new Error('Module name is required when defining a module.');
                 }
-                deps = deps || [];
                 if (!util.isArray(deps)) {
                     throw new Error('Dependencies must be supplied as an array.');
                 }
-                //args = resolver.resolveDeps(deps);
-                for (i = 0, len = deps.length; i < len; i++) {
-                    dep = deps[i];
-                    aModule = resolver.resolve(modules, dep, { action: 'get' });
-                    if (!aModule) {
-                        console.warn('Fail to inject dependency named: "' + dep + '".');
-                    }
-                    args.push(aModule);
-                }
+                args = resolver.resolveDeps(modules, deps);
                 resolver.exports(modules, name, fn.apply(base, args));
             };
             var require = function (deps, options) {
@@ -314,7 +291,7 @@ var resolver, util, constant, foundation, moduler;
                 }
                 options = options || {};
                 // we resovle currently empty object, if necessary we can augment exist module
-                return resolver.attach(modules, options.base || {}, deps);
+                return resolver.attach(modules, deps, options.base || {});
             };
             var setup = function (fn) {
                 fn(config);

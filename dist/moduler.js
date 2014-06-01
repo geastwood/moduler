@@ -39,7 +39,7 @@ var resolver, util, constant, foundation, moduler;
             if (!name) {
                 throw new Error('module name must be specified.');
             }
-            // here name doesn't has alias
+            // here name doesn't have alias
             parse = nameService.parseModule(name);
             hasSubmodule = parse !== null;
             if (hasSubmodule) {

@@ -2,8 +2,34 @@
 var resolver, util, constant, foundation, moduler;
 (function () {
     resolver = function () {
-        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-        var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
+        var nameService = function () {
+                var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
+                var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
+                return {
+                    module: function (name) {
+                        var alias = MODULE_ALIAS_REGEX.exec(name);
+                        var submodules;
+                        // if there is alias name
+                        if (alias) {
+                            return alias[2];
+                        } else {
+                            // if there is a submodule
+                            submodules = MODULE_NAME_REGEX.exec(name);
+                            if (submodules) {
+                                return name.split('.').pop();
+                            }
+                            return name;
+                        }
+                    },
+                    parseModule: function (name) {
+                        return MODULE_NAME_REGEX.exec(name);
+                    },
+                    stripAlias: function (name) {
+                        var alias = MODULE_ALIAS_REGEX.exec(name);
+                        return alias ? alias[1] : name;
+                    }
+                };
+            }();
         /**
          * Resolve namespace with "get" or "set" methods
          */
@@ -13,7 +39,8 @@ var resolver, util, constant, foundation, moduler;
             if (!name) {
                 throw new Error('module name must be specified.');
             }
-            parse = MODULE_NAME_REGEX.exec(name);
+            // here name doesn't has alias
+            parse = nameService.parseModule(name);
             hasSubmodule = parse !== null;
             if (hasSubmodule) {
                 target[parse[1]] = target[parse[1]] || {};
@@ -31,33 +58,6 @@ var resolver, util, constant, foundation, moduler;
             } else {
                 throw new Error('Failed to resolve.');
             }
-        }
-        /**
-         * resolve module name
-         *
-         * @return string
-         */
-        function moduleName(name) {
-            var alias = MODULE_ALIAS_REGEX.exec(name);
-            var submodules;
-            if (alias) {
-                return alias[2];
-            } else {
-                submodules = MODULE_NAME_REGEX.exec(name);
-                if (submodules) {
-                    return name.split('.').pop();
-                }
-                return name;
-            }
-        }
-        /**
-         * Resolve alias name
-         *
-         * @return string
-         */
-        function aliasName(name) {
-            var alias = MODULE_ALIAS_REGEX.exec(name);
-            return alias ? alias[1] : name;
         }
         /**
          * exports function, delegate to set action of resolve function
@@ -79,21 +79,40 @@ var resolver, util, constant, foundation, moduler;
             for (i = 0, len = deps.length; i < len; i++) {
                 dep = deps[i];
                 // resolve the dependency name, parse deep namespace or alias
-                resolvedName = moduleName(dep);
+                resolvedName = nameService.module(dep);
                 // assign resolved module to resolved name
-                target[resolvedName] = resolve(source, aliasName(dep), { action: 'get' });
+                // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
+                target[resolvedName] = resolve(source, nameService.stripAlias(dep), { action: 'get' });
                 // give warning if the resolved module is empty
                 if (typeof target[resolvedName] === 'undefined') {
                     console.warn('module with the name "' + dep + '" is not found.');
                 }
             }
+            /*
+            
+                    for (i = 0, len = deps.length; i < len; i++) {
+            
+                        dep = deps[i];
+            
+                        aModule = resolver.resolve(modules, dep, {action: 'get'});
+            
+                        if (!aModule) {
+                            console.warn('Fail to inject dependency named: "' + dep + '".');
+                        }
+            
+                        args.push(aModule);
+            
+                    }
+            
+                    */
             return target;
         }
         // api
         return {
             resolve: resolve,
+            /*resolveDep: resolveDep,*/
             attach: attach,
-            'exports': exports
+            exports: exports
         };
     }();
     util = function () {
@@ -278,6 +297,7 @@ var resolver, util, constant, foundation, moduler;
                 if (!util.isArray(deps)) {
                     throw new Error('Dependencies must be supplied as an array.');
                 }
+                //args = resolver.resolveDeps(deps);
                 for (i = 0, len = deps.length; i < len; i++) {
                     dep = deps[i];
                     aModule = resolver.resolve(modules, dep, { action: 'get' });

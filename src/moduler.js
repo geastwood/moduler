@@ -41,6 +41,8 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
                 throw new Error('Dependencies must be supplied as an array.');
             }
 
+            //args = resolver.resolveDeps(deps);
+
             for (i = 0, len = deps.length; i < len; i++) {
 
                 dep = deps[i];

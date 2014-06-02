@@ -3,7 +3,7 @@
  * use to resolve namespaces
  * set or get object for namespaces
  */
-define(function() {
+define(['scriptLoader'], function(scriptLoader) {
 
     var nameService = (function () {
 
@@ -104,7 +104,8 @@ define(function() {
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
                 console.warn('module with the name "' + dep + '" is not found.');
-                aModule = null;
+                // load module remotely
+                //aModule = new scriptLoader({});
             }
 
             if (target) {
@@ -115,7 +116,7 @@ define(function() {
 
                 // assign resolved module to resolved name
                 // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-                target[resolvedName] = resolve(source, nameService.stripAlias(dep), {action: 'get'});
+                target[resolvedName] = aModule;
 
             } else {
                 rtn.push(aModule);

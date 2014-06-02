@@ -1,6 +1,11 @@
 ;(function() {
-var resolver, util, constant, foundation, moduler;
+var scriptLoader, resolver, util, constant, foundation, moduler;
 (function () {
+    scriptLoader = function () {
+        var scriptLoader = function () {
+        };
+        return scriptLoader;
+    }();
     resolver = function () {
         var nameService = function () {
                 var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
@@ -77,7 +82,6 @@ var resolver, util, constant, foundation, moduler;
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
                     console.warn('module with the name "' + dep + '" is not found.');
-                    aModule = null;
                 }
                 if (target) {
                     // resolve the dependency name, parse deep namespace or alias
@@ -85,7 +89,7 @@ var resolver, util, constant, foundation, moduler;
                     resolvedName = nameService.module(dep);
                     // assign resolved module to resolved name
                     // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-                    target[resolvedName] = resolve(source, nameService.stripAlias(dep), { action: 'get' });
+                    target[resolvedName] = aModule;
                 } else {
                     rtn.push(aModule);
                 }

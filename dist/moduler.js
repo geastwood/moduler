@@ -1,12 +1,62 @@
 ;(function() {
-var scriptLoader, resolver, util, constant, foundation, moduler;
+var scriptLoader, dependencyManager, resolver, util, constant, foundation, moduler;
 (function () {
     scriptLoader = function () {
-        var scriptLoader = function () {
+        var scriptLoader = function (url, ns, fn) {
+            this.url = url;
+            this.ns = ns;
+            this.fn = fn;
+        };
+        scriptLoader.prototype.load = function () {
+            var script = document.createElement('script');
+            script.src = url;
+            moduler.bindDefine(ns);
+            document.head.appendChild(script);
         };
         return scriptLoader;
     }();
-    resolver = function () {
+    dependencyManager = function () {
+        var DependencyManager = function (source, deps) {
+            this.source = source;
+            this.deps = deps;
+            this.count = 0;
+            this.data = {
+                deps: [],
+                names: []
+            };
+        };
+        DependencyManager.prototype.resolve = function () {
+            var i, len, dep, resolvedName, aModule;
+            if (this.deps.length === 0) {
+                this.ready();
+            }
+            for (i = 0, len = this.deps.length; i < len; i++) {
+                dep = this.deps[i];
+                aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), { action: 'get' });
+                // give warning if the resolved module is empty
+                if (typeof aModule === 'undefined') {
+                    console.warn('module with the name "' + dep + '" is not found.');
+                }
+                this.data.names.push(resolver.nameService.module(dep));
+                this.data.deps.push(aModule);
+                this.update();
+            }
+        };
+        DependencyManager.prototype.ready = function (fn) {
+            var that = this;
+            return function () {
+                fn(that.data);
+            };
+        };
+        DependencyManager.prototype.update = function () {
+            this.count = this.count + 1;
+            if (this.count === this.deps.length) {
+                this.ready();
+            }
+        };
+        return DependencyManager;
+    }();
+    resolver = function (DM) {
         var nameService = function () {
                 var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
                 var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
@@ -73,37 +123,33 @@ var scriptLoader, resolver, util, constant, foundation, moduler;
                 obj: obj
             });
         }
-        function resolveDeps(source, deps, target) {
-            var i, len, dep, resolvedName, aModule;
-            var rtn = target ? target : [];
-            for (i = 0, len = deps.length; i < len; i++) {
-                dep = deps[i];
-                aModule = resolve(source, nameService.stripAlias(dep), { action: 'get' });
-                // give warning if the resolved module is empty
-                if (typeof aModule === 'undefined') {
-                    console.warn('module with the name "' + dep + '" is not found.');
+        function define(source, name, fn, deps, base) {
+            var dm = new DM(source, deps);
+            dm.ready = dm.ready(function (data) {
+                exports(source, name, fn.apply(base, data.deps));
+            });
+            dm.resolve();
+        }
+        /* this base is a bit different*/
+        function require(source, deps, target) {
+            var dm = new DM(source, deps, target);
+            dm.ready = dm.ready(function (data) {
+                for (var i = 0, len = data.names.length; i < len; i++) {
+                    target[data.names[i]] = data.deps[i];
                 }
-                if (target) {
-                    // resolve the dependency name, parse deep namespace or alias
-                    // here considers the alias
-                    resolvedName = nameService.module(dep);
-                    // assign resolved module to resolved name
-                    // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-                    target[resolvedName] = aModule;
-                } else {
-                    rtn.push(aModule);
-                }
-            }
-            return rtn;
+            });
+            dm.resolve();
+            return target;
         }
         // api
         return {
             resolve: resolve,
-            resolveDeps: resolveDeps,
-            attach: resolveDeps,
+            nameService: nameService,
+            define: define,
+            require: require,
             exports: exports
         };
-    }();
+    }(dependencyManager);
     util = function () {
         var hasOwn = Object.prototype.hasOwnProperty;
         var ostring = Object.prototype.toString;
@@ -257,52 +303,59 @@ var scriptLoader, resolver, util, constant, foundation, moduler;
     }();
     moduler = function (Constant) {
         
+        var bindDefineModule = null;
         var moduleManager = function (ns) {
             var modules = {};
             // augument default "modules" object with foundation's methods
             util.mixin(modules, foundation.modules);
             var config = {};
-            // will be bind with 'this' when defining modules
-            var base = {
-                    constant: function () {
-                        var constant = new Constant();
-                        return {
-                            get: constant.get,
-                            set: constant.set
-                        };
-                    }(),
-                    inherit: util.inherit,
-                    mixin: util.mixin,
-                    each: util.each,
-                    exports: util.exports,
-                    extendCtor: util.extendCtor
-                };
-            var define = function (name, fn, deps) {
-                var args;
-                deps = deps || [];
-                if (!name) {
-                    throw new Error('Module name is required when defining a module.');
-                }
-                if (!util.isArray(deps)) {
-                    throw new Error('Dependencies must be supplied as an array.');
-                }
-                args = resolver.resolveDeps(modules, deps);
-                resolver.exports(modules, name, fn.apply(base, args));
-            };
-            var require = function (deps, options) {
-                if (!util.isArray(deps)) {
-                    throw new Error('Dependencies must be supplied as an array.');
-                }
-                options = options || {};
-                // we resovle currently empty object, if necessary we can augment exist module
-                return resolver.attach(modules, deps, options.base || {});
-            };
             var setup = function (fn) {
                 fn(config);
             };
-            ns.define = define;
-            ns.require = require;
+            ns.define = function (name, fn, deps) {
+                return define.call(modules, name, fn, deps);
+            };
+            ns.require = function (deps, options) {
+                return require.call(modules, deps, options);
+            };
+            ns.getModules = function () {
+                return modules;
+            };
             ns.setup = setup;
+        };
+        // will be bind with 'this' when defining modules
+        var base = {
+                constant: function () {
+                    var constant = new Constant();
+                    return {
+                        get: constant.get,
+                        set: constant.set
+                    };
+                }(),
+                inherit: util.inherit,
+                mixin: util.mixin,
+                each: util.each,
+                exports: util.exports,
+                extendCtor: util.extendCtor
+            };
+        var define = function (name, fn, deps) {
+            var args;
+            deps = deps || [];
+            if (!name) {
+                throw new Error('Module name is required when defining a module.');
+            }
+            if (!util.isArray(deps)) {
+                throw new Error('Dependencies must be supplied as an array.');
+            }
+            resolver.define(this, name, fn, deps, base);
+        };
+        var require = function (deps, options) {
+            if (!util.isArray(deps)) {
+                throw new Error('Dependencies must be supplied as an array.');
+            }
+            options = options || {};
+            // we resovle currently empty object, if necessary we can augment exist module
+            return resolver.require(this, deps, options.base || {});
         };
         // api
         return {
@@ -317,6 +370,19 @@ var scriptLoader, resolver, util, constant, foundation, moduler;
             },
             debug: function () {
                 console.dir(foundation);
+            },
+            bindDefine: function (target, isNs) {
+                if (isNs) {
+                    bindDefineModule = target.getModules();
+                } else {
+                    bindDefineModule = target;
+                }
+            },
+            define: function (name, fn, deps) {
+                if (bindDefineModule === null) {
+                    console.warn('Bind Define module is not set');
+                }
+                return define.call(bindDefineModule, name, fn, deps);
             }
         };
     }(constant);

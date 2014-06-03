@@ -3,7 +3,7 @@
  * use to resolve namespaces
  * set or get object for namespaces
  */
-define(['scriptLoader'], function(scriptLoader) {
+define(['dependencyManager'], function(DM) {
 
     var nameService = (function () {
 
@@ -90,49 +90,36 @@ define(['scriptLoader'], function(scriptLoader) {
         return resolve(target, name, {action: 'set', obj: obj});
     }
 
-    function resolveDeps(source, deps, target) {
 
-        var i, len, dep, resolvedName, aModule;
+    function define(source, name, fn, deps, base) {
 
-        var rtn = target ? target : [];
+        var dm = new DM(source, deps);
+        dm.ready = dm.ready(function(data) {
+            exports(source, name, fn.apply(base, data.deps));
+        });
+        dm.resolve();
+    }
 
-        for (i = 0, len = deps.length; i < len; i++) {
+    /* this base is a bit different*/
+    function require(source, deps, target) {
 
-            dep = deps[i];
-            aModule = resolve(source, nameService.stripAlias(dep), {action: 'get'});
-
-            // give warning if the resolved module is empty
-            if (typeof aModule === 'undefined') {
-                console.warn('module with the name "' + dep + '" is not found.');
-                // load module remotely
-                //aModule = new scriptLoader({});
+        var dm = new DM(source, deps, target);
+        dm.ready = dm.ready(function(data) {
+            for (var i = 0, len = data.names.length; i < len; i++) {
+                target[data.names[i]] = data.deps[i];
             }
 
-            if (target) {
-
-                // resolve the dependency name, parse deep namespace or alias
-                // here considers the alias
-                resolvedName = nameService.module(dep);
-
-                // assign resolved module to resolved name
-                // when resolve strip all alias name, keep only the 'name.spcae.to.resolve'
-                target[resolvedName] = aModule;
-
-            } else {
-                rtn.push(aModule);
-            }
-
-
-        }
-
-        return rtn;
+        });
+        dm.resolve();
+        return target;
     }
 
     // api
     return {
         resolve: resolve,
-        resolveDeps: resolveDeps,
-        attach: resolveDeps,
+        nameService: nameService,
+        define: define,
+        require: require,
         exports: exports
     };
 

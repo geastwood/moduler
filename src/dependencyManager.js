@@ -1,4 +1,4 @@
-define(['resolver', 'scriptLoader'], function(resolver, scriptLoader) {
+define(['resolver', 'scriptLoader'], function(resolver, SL) {
 
     var DependencyManager = function(source, deps) {
         this.source = source;
@@ -12,7 +12,7 @@ define(['resolver', 'scriptLoader'], function(resolver, scriptLoader) {
 
     DependencyManager.prototype.resolve = function() {
 
-        var i, len, dep, resolvedName, aModule;
+        var i, len, dep, resolvedName, aModule, that = this;;
 
         if (this.deps.length === 0) {
             this.ready();
@@ -23,18 +23,17 @@ define(['resolver', 'scriptLoader'], function(resolver, scriptLoader) {
             dep = this.deps[i];
             aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), {action: 'get'});
 
+            /*
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
                 console.warn('module with the name "' + dep + '" is not found.');
 
                 // load module remotely
-                /*
-                new scriptLoader('http://localhost:8888/js/modules/module1.js', target, function() {
-
-                }));
-                console.warn('resolving ' + dep + '" remotely.');
-                */
+                new SL('http://localhost:8888/js/modules/module1.js', that.source, function() {
+                    that.update();
+                });
             }
+            */
 
             this.data.names.push(resolver.nameService.module(dep));
             this.data.deps.push(aModule);
@@ -52,10 +51,10 @@ define(['resolver', 'scriptLoader'], function(resolver, scriptLoader) {
     };
 
     DependencyManager.prototype.update = function() {
-         this.count = this.count + 1;
-         if (this.count === this.deps.length) {
+        this.count = this.count + 1;
+        if (this.count === this.deps.length) {
             this.ready();
-         }
+        }
     };
 
     return DependencyManager;

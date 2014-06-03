@@ -2,20 +2,25 @@
 var scriptLoader, dependencyManager, resolver, util, constant, foundation, moduler;
 (function () {
     scriptLoader = function () {
-        var scriptLoader = function (url, ns, fn) {
+        var ScriptLoader = function (url, ns, fn) {
             this.url = url;
             this.ns = ns;
             this.fn = fn;
+            this.load();
         };
-        scriptLoader.prototype.load = function () {
+        ScriptLoader.prototype.load = function () {
             var script = document.createElement('script');
-            script.src = url;
-            moduler.bindDefine(ns);
+            script.src = this.url;
+            moduler.bindDefine(this.ns);
+            var that = this;
+            script.onload = function () {
+                that.fn();
+            };
             document.head.appendChild(script);
         };
-        return scriptLoader;
+        return ScriptLoader;
     }();
-    dependencyManager = function () {
+    dependencyManager = function (SL) {
         var DependencyManager = function (source, deps) {
             this.source = source;
             this.deps = deps;
@@ -26,17 +31,24 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             };
         };
         DependencyManager.prototype.resolve = function () {
-            var i, len, dep, resolvedName, aModule;
+            var i, len, dep, resolvedName, aModule, that = this;
             if (this.deps.length === 0) {
                 this.ready();
             }
             for (i = 0, len = this.deps.length; i < len; i++) {
                 dep = this.deps[i];
                 aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), { action: 'get' });
-                // give warning if the resolved module is empty
-                if (typeof aModule === 'undefined') {
-                    console.warn('module with the name "' + dep + '" is not found.');
-                }
+                /*
+                            // give warning if the resolved module is empty
+                            if (typeof aModule === 'undefined') {
+                                console.warn('module with the name "' + dep + '" is not found.');
+                
+                                // load module remotely
+                                new SL('http://localhost:8888/js/modules/module1.js', that.source, function() {
+                                    that.update();
+                                });
+                            }
+                            */
                 this.data.names.push(resolver.nameService.module(dep));
                 this.data.deps.push(aModule);
                 this.update();
@@ -55,7 +67,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
         };
         return DependencyManager;
-    }();
+    }(scriptLoader);
     resolver = function (DM) {
         var nameService = function () {
                 var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;

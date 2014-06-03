@@ -12,8 +12,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
         var config = {};
 
-
-
         var setup = function(fn) {
             fn(config);
         };
@@ -27,7 +25,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         ns.getModules = function() {
             return modules;
         };
-
         ns.setup = setup;
 
     };

@@ -1,14 +1,19 @@
 define(function() {
-    var scriptLoader = function(url, ns, fn) {
+    var ScriptLoader = function(url, ns, fn) {
         this.url = url;
         this.ns = ns;
         this.fn = fn;
+        this.load();
     };
-    scriptLoader.prototype.load = function() {
+    ScriptLoader.prototype.load = function() {
         var script = document.createElement('script');
-        script.src = url;
-        moduler.bindDefine(ns);
+        script.src = this.url;
+        moduler.bindDefine(this.ns);
+        var that = this;
+        script.onload = function() {
+            that.fn();
+        };
         document.head.appendChild(script);
     };
-    return scriptLoader;
+    return ScriptLoader;
 });

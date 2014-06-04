@@ -2,10 +2,12 @@
 var scriptLoader, dependencyManager, resolver, util, constant, foundation, moduler;
 (function () {
     scriptLoader = function () {
-        var ScriptLoader = function (url, ns, fn) {
+        var ScriptLoader = function (url, ns, fn, name) {
             this.url = url;
             this.ns = ns;
+            /* source obj/ns obj to bind 'define' method */
             this.fn = fn;
+            this.name = name;
             this.load();
         };
         ScriptLoader.prototype.load = function () {
@@ -14,7 +16,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             moduler.bindDefine(this.ns);
             var that = this;
             script.onload = function () {
-                that.fn();
+                that.fn(that.name);
             };
             document.head.appendChild(script);
         };
@@ -30,6 +32,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 names: []
             };
         };
+        var baseUrl = 'http://localhost:8888/js/modules/';
         DependencyManager.prototype.resolve = function () {
             var i, len, dep, resolvedName, aModule, that = this;
             if (this.deps.length === 0) {
@@ -38,21 +41,24 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             for (i = 0, len = this.deps.length; i < len; i++) {
                 dep = this.deps[i];
                 aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), { action: 'get' });
-                /*
-                            // give warning if the resolved module is empty
-                            if (typeof aModule === 'undefined') {
-                                console.warn('module with the name "' + dep + '" is not found.');
-                
-                                // load module remotely
-                                new SL('http://localhost:8888/js/modules/module1.js', that.source, function() {
-                                    that.update();
-                                });
-                            }
-                            */
-                this.data.names.push(resolver.nameService.module(dep));
-                this.data.deps.push(aModule);
-                this.update();
+                // give warning if the resolved module is empty
+                if (typeof aModule === 'undefined') {
+                    // load module remotely, TODO: refactor duplicate code
+                    new SL(baseUrl + resolver.nameService.stripAlias(dep) + '.js', this.source, function (name) {
+                        /* callback  */
+                        that.register(that.source, name);
+                        that.update();
+                    }, dep);
+                } else {
+                    this.register(this.source, dep, resolver.nameService.stripAlias(dep));
+                    this.update();
+                }
             }
+        };
+        DependencyManager.prototype.register = function (source, depName) {
+            var aModule = resolver.resolve(source, resolver.nameService.stripAlias(depName), { action: 'get' });
+            this.data.names.push(resolver.nameService.module(depName));
+            this.data.deps.push(aModule);
         };
         DependencyManager.prototype.ready = function (fn) {
             var that = this;

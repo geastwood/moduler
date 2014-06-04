@@ -10,9 +10,11 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
         };
     };
 
+    var baseUrl = 'http://localhost:8888/js/modules/';
+
     DependencyManager.prototype.resolve = function() {
 
-        var i, len, dep, resolvedName, aModule, that = this;;
+        var i, len, dep, resolvedName, aModule, that = this;
 
         if (this.deps.length === 0) {
             this.ready();
@@ -23,35 +25,48 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
             dep = this.deps[i];
             aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), {action: 'get'});
 
-            /*
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
-                console.warn('module with the name "' + dep + '" is not found.');
 
-                // load module remotely
-                new SL('http://localhost:8888/js/modules/module1.js', that.source, function() {
+                // load module remotely, TODO: refactor duplicate code
+                new SL(baseUrl + resolver.nameService.stripAlias(dep) + '.js'/* url */,
+                       this.source/* modules */,
+                       function(name) { /* callback  */
+
+                    that.register(that.source, name);
                     that.update();
-                });
-            }
-            */
+                }, dep /* dependency name */);
+            } else {
 
-            this.data.names.push(resolver.nameService.module(dep));
-            this.data.deps.push(aModule);
-            this.update();
+                this.register(this.source, dep, resolver.nameService.stripAlias(dep));
+                this.update();
+            }
+
 
         }
 
     };
 
+    DependencyManager.prototype.register = function(source, depName) {
+
+        var aModule = resolver.resolve(source, resolver.nameService.stripAlias(depName), {action: 'get'});
+        this.data.names.push(resolver.nameService.module(depName));
+        this.data.deps.push(aModule);
+
+    };
     DependencyManager.prototype.ready = function(fn) {
+
         var that = this;
+
         return function() {
             fn(that.data);
         };
     };
 
     DependencyManager.prototype.update = function() {
+
         this.count = this.count + 1;
+
         if (this.count === this.deps.length) {
             this.ready();
         }

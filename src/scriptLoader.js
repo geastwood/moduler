@@ -1,8 +1,9 @@
 define(function() {
-    var ScriptLoader = function(url, ns, fn) {
+    var ScriptLoader = function(url, ns, fn, name) {
         this.url = url;
-        this.ns = ns;
+        this.ns = ns; /* source obj/ns obj to bind 'define' method */
         this.fn = fn;
+        this.name = name;
         this.load();
     };
     ScriptLoader.prototype.load = function() {
@@ -11,7 +12,7 @@ define(function() {
         moduler.bindDefine(this.ns);
         var that = this;
         script.onload = function() {
-            that.fn();
+            that.fn(that.name);
         };
         document.head.appendChild(script);
     };

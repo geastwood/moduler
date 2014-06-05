@@ -55,8 +55,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-exec');
-    grunt.registerTask('test', ['build', 'exec', 'jasmine']);
     grunt.registerTask('build', ['requirejs:js']);
     grunt.registerTask('server', ['exec']);
+    grunt.registerTask('test', ['build', 'server', 'jasmine']);
     grunt.registerTask('default', ['exec', 'watch']);
 };

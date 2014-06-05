@@ -7,7 +7,8 @@ module.exports = function(grunt) {
             options: {
                 specs: ['tests/moduler.js',
                         'tests/extend_util.js',
-                        'tests/base.js']
+                        'tests/base.js',
+                        'tests/script_loader.js']
             }
         },
         watch: {
@@ -42,12 +43,21 @@ module.exports = function(grunt) {
                     }
                 }
             }
+        },
+        exec: {
+            startServer: {
+                cmd: 'node server.js',
+                cwd: 'test-server/'
+            }
         }
+
     });
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-exec');
     grunt.registerTask('test', ['build', 'jasmine']);
     grunt.registerTask('build', ['requirejs:js']);
+    grunt.registerTask('server', ['exec']);
     grunt.registerTask('default', 'watch');
 };

@@ -27,10 +27,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             this.source = source;
             this.deps = deps;
             this.count = 0;
-            this.data = {
-                deps: [],
-                names: []
-            };
+            this.data = {};
         };
         var baseUrl = 'http://localhost:8888/js/modules/';
         DependencyManager.prototype.resolve = function () {
@@ -40,6 +37,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
             for (i = 0, len = this.deps.length; i < len; i++) {
                 dep = this.deps[i];
+                this.data[resolver.nameService.module(dep)] = null;
                 aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), { action: 'get' });
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
@@ -57,8 +55,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         };
         DependencyManager.prototype.register = function (source, depName) {
             var aModule = resolver.resolve(source, resolver.nameService.stripAlias(depName), { action: 'get' });
-            this.data.names.push(resolver.nameService.module(depName));
-            this.data.deps.push(aModule);
+            this.data[resolver.nameService.module(depName)] = aModule;
         };
         DependencyManager.prototype.ready = function (fn) {
             var that = this;
@@ -144,7 +141,11 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         function define(source, name, fn, deps, base) {
             var dm = new DM(source, deps);
             dm.ready = dm.ready(function (data) {
-                exports(source, name, fn.apply(base, data.deps));
+                var deps = [];
+                for (var dep in data) {
+                    deps.push(data[dep]);
+                }
+                exports(source, name, fn.apply(base, deps));
             });
             dm.resolve();
         }
@@ -152,8 +153,8 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         function require(source, deps, target) {
             var dm = new DM(source, deps, target);
             dm.ready = dm.ready(function (data) {
-                for (var i = 0, len = data.names.length; i < len; i++) {
-                    target[data.names[i]] = data.deps[i];
+                for (var dep in data) {
+                    target[dep] = data[dep];
                 }
             });
             dm.resolve();

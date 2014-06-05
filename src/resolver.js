@@ -95,7 +95,11 @@ define(['dependencyManager'], function(DM) {
 
         var dm = new DM(source, deps);
         dm.ready = dm.ready(function(data) {
-            exports(source, name, fn.apply(base, data.deps));
+            var deps = [];
+            for (var dep in data) {
+                deps.push(data[dep]);
+            }
+            exports(source, name, fn.apply(base, deps));
         });
         dm.resolve();
     }
@@ -105,8 +109,8 @@ define(['dependencyManager'], function(DM) {
 
         var dm = new DM(source, deps, target);
         dm.ready = dm.ready(function(data) {
-            for (var i = 0, len = data.names.length; i < len; i++) {
-                target[data.names[i]] = data.deps[i];
+            for (var dep in data) {
+                target[dep] = data[dep];
             }
 
         });

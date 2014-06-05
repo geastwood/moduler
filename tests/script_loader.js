@@ -1,5 +1,5 @@
 var fb = {};
-xdescribe('script loader', function() {
+describe('script loader', function() {
     beforeEach(function(done) {
         moduler.create(fb);
         fb.define('bar', function(greeter, m2) {
@@ -19,7 +19,7 @@ xdescribe('script loader', function() {
         expect(msg.bar.say('this is ')).toBe('this is module2!');
     });
 });
-xdescribe('script loader mixed', function() {
+describe('script loader mixed', function() {
 
     beforeEach(function(done) {
         moduler.create(fb);

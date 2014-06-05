@@ -126,7 +126,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 target[name] = options.obj;
                 return true;
             } else {
-                throw new Error('Failed to resolve.');
+                throw new Error('Unsupported action.');
             }
         }
         /**

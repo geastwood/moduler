@@ -44,7 +44,7 @@ xdescribe('script loader mixed', function() {
         });
     });
 });
-describe('script loader - require', function() {
+xdescribe('script loader - require', function() {
     var req, f, msg;
     beforeEach(function(done) {
         moduler.create(fb);

@@ -12,7 +12,7 @@ describe('script loader', function() {
         }, ['greet', 'module2']);
         setTimeout(function() {
             done();
-        }, 3000);
+        }, 4000);
     });
     it('should work', function() {
         var msg = fb.require(['bar']);

@@ -27,6 +27,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         };
         ns.setup = setup;
 
+        return ns;
     };
 
     // will be bind with 'this' when defining modules
@@ -78,6 +79,10 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
     // api
     return {
         create: function(ns) {
+
+            if (!ns) {
+                throw new Error('An object must be specified.');
+            }
             return moduleManager(ns);
         },
         exports: function(target, name, obj) {

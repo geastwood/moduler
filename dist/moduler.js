@@ -2,73 +2,128 @@
 var scriptLoader, dependencyManager, resolver, util, constant, foundation, moduler;
 (function () {
     scriptLoader = function () {
-        var ScriptLoader = function (url, ns, fn, name) {
+        var ScriptLoader = function (url, ns, onLoadCallback, name) {
             this.url = url;
+            /* url of the module */
             this.ns = ns;
             /* source obj/ns obj to bind 'define' method */
-            this.fn = fn;
+            this.onLoadCallback = onLoadCallback;
             this.name = name;
             this.load();
         };
+        // TODO: add cross-browser support
         ScriptLoader.prototype.load = function () {
             var script = document.createElement('script');
+            var that = this;
             script.src = this.url;
             moduler.bindDefine(this.ns);
-            var that = this;
             script.onload = function () {
-                that.fn(that.name);
+                that.onLoadCallback(that.name);
             };
             document.head.appendChild(script);
         };
         return ScriptLoader;
     }();
     dependencyManager = function (SL) {
+        /**
+         * Dependency manager constructor
+         * A dep manager only need the source Object and a list of dependency
+         * TODO: add options
+         *
+         * @return object
+         */
         var DependencyManager = function (source, deps) {
             this.source = source;
+            // source of where objs are attached to
             this.deps = deps;
+            // input deps
             this.count = 0;
+            // hold deps counts
             this.data = {};
         };
+        // TODO: move to path manager
         var baseUrl = 'http://localhost:8888/js/modules/';
+        /**
+         * Try resolving all Deps
+         *
+         * @return undefined
+         */
         DependencyManager.prototype.resolve = function () {
-            var i, len, dep, resolvedName, aModule, that = this;
+            var i, len, dep, aModule, moduleName, that = this;
+            // if no deps needed, then just call ready callback
             if (this.deps.length === 0) {
                 this.ready();
             }
             for (i = 0, len = this.deps.length; i < len; i++) {
                 dep = this.deps[i];
+                moduleName = resolver.nameService.stripAlias(dep);
                 this.data[resolver.nameService.module(dep)] = null;
-                aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(dep), { action: 'get' });
+                aModule = resolver.resolve(this.source, moduleName, { action: 'get' });
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
-                    // load module remotely, TODO: refactor duplicate code
-                    new SL(baseUrl + resolver.nameService.stripAlias(dep) + '.js', this.source, function (name) {
-                        /* callback  */
-                        that.register(that.source, name);
+                    // load module remotely
+                    new SL(baseUrl + moduleName + '.js', this.source, function (name) {
+                        /* callback for some script loader */
+                        that.register(name);
                     }, dep);
                 } else {
-                    this.register(this.source, dep, resolver.nameService.stripAlias(dep));
+                    this.register(dep, moduleName);
                 }
             }
         };
-        DependencyManager.prototype.register = function repeat(source, depName) {
-            var aModule = resolver.resolve(source, resolver.nameService.stripAlias(depName), { action: 'get' });
+        /**
+         * Try to register a module, call back script loader's onload callback
+         *
+         * this function is used as callback for script "onload" event
+         * if the script is ready, this function will be run
+         *
+         * @return undefined
+         */
+        DependencyManager.prototype.register = function repeat(depName) {
+            var aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(depName), { action: 'get' });
             var that = this;
             if (!aModule) {
+                // if the module at this point is "undefined" that means the loaded module has dependencies of other modules
+                // so register a recursive call to check the availablity of it's dependencies until it become available
+                // then to update
                 setTimeout(function () {
-                    repeat.call(that, source, depName);
-                }, 10);
+                    repeat.call(that, depName);
+                }, 15);
             } else {
+                // resolve one module, at this point we are sure, there is a value of "aModule"
                 this.data[resolver.nameService.module(depName)] = aModule;
+                // if any dependency is resolved, update call will be fired to check whether all dependencies are loaded
+                // if yes, ready callback will by fired.
                 this.update();
             }
         };
-        DependencyManager.prototype.ready = function (fn) {
+        /**
+         * Interface method
+         *
+         * @return error
+         */
+        DependencyManager.prototype.ready = function () {
+            throw new Error('This method need to be implemented. Cannot be call from here.');
+        };
+        /**
+         * Register ready callback, when all dependencies are loaded,
+         * run the callbacks and passing dependency collection
+         *
+         * @return function
+         */
+        DependencyManager.prototype.registerReadyCb = function (fn) {
             var that = this;
             return function () {
                 fn(that.data);
             };
         };
+        /**
+         * If any dep is resolved, this method should be called
+         * with each invocation, it will check wheather all deps are met,
+         * if yes, excute the ready callback
+         *
+         * @return undefined
+         */
         DependencyManager.prototype.update = function () {
             this.count = this.count + 1;
             if (this.count === this.deps.length) {
@@ -144,26 +199,31 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 obj: obj
             });
         }
+        function formatDeps(source) {
+            var deps = [];
+            for (var dep in source) {
+                if (source.hasOwnProperty(dep)) {
+                    if (this) {
+                        this[dep] = source[dep];
+                    }
+                    deps.push(source[dep]);
+                }
+            }
+            return deps;
+        }
         function define(source, name, fn, deps, base) {
             var dm = new DM(source, deps);
-            dm.ready = dm.ready(function (data) {
-                var deps = [];
-                for (var dep in data) {
-                    deps.push(data[dep]);
-                }
+            dm.ready = dm.registerReadyCb(function (data) {
+                var deps = formatDeps.call(null, data);
                 exports(source, name, fn.apply(base, deps));
             });
             dm.resolve();
         }
-        /* this base is a bit different*/
         function require(source, deps, target, fn) {
-            var dm = new DM(source, deps, target);
-            dm.ready = dm.ready(function (data) {
-                var deps = [];
-                for (var dep in data) {
-                    target[dep] = data[dep];
-                    deps.push(data[dep]);
-                }
+            var dm = new DM(source, deps);
+            // define a ready callback with "registerReadyCb" function provided by DependencyManager object
+            dm.ready = dm.registerReadyCb(function (data) {
+                var deps = formatDeps.call(target, data);
                 if (fn) {
                     fn.apply(null, deps);
                 }
@@ -352,6 +412,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 return modules;
             };
             ns.setup = setup;
+            return ns;
         };
         // will be bind with 'this' when defining modules
         var base = {
@@ -390,6 +451,9 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         // api
         return {
             create: function (ns) {
+                if (!ns) {
+                    throw new Error('An object must be specified.');
+                }
                 return moduleManager(ns);
             },
             exports: function (target, name, obj) {

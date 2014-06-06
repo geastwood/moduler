@@ -1,6 +1,11 @@
 - ~~script tag~~
+- ~~cache~~
+- adapt require api to add ready callback and adapt tests
+- remove require augment base object
 - module blacklist
-- shim
-- cache
+- module config
 - combo handler
 - path
+- shim
+- script loader error handling
+- maybe rename

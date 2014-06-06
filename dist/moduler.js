@@ -45,17 +45,23 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                     new SL(baseUrl + resolver.nameService.stripAlias(dep) + '.js', this.source, function (name) {
                         /* callback  */
                         that.register(that.source, name);
-                        that.update();
                     }, dep);
                 } else {
                     this.register(this.source, dep, resolver.nameService.stripAlias(dep));
-                    this.update();
                 }
             }
         };
-        DependencyManager.prototype.register = function (source, depName) {
+        DependencyManager.prototype.register = function repeat(source, depName) {
             var aModule = resolver.resolve(source, resolver.nameService.stripAlias(depName), { action: 'get' });
-            this.data[resolver.nameService.module(depName)] = aModule;
+            var that = this;
+            if (!aModule) {
+                setTimeout(function () {
+                    repeat.call(that, source, depName);
+                }, 10);
+            } else {
+                this.data[resolver.nameService.module(depName)] = aModule;
+                this.update();
+            }
         };
         DependencyManager.prototype.ready = function (fn) {
             var that = this;

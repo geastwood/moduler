@@ -101,7 +101,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
                 console.warn('Bind Define module is not set');
             }
             return define.call(bindDefineModule, name, fn, deps);
-
         }
     };
 

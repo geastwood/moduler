@@ -105,15 +105,22 @@ define(['dependencyManager'], function(DM) {
     }
 
     /* this base is a bit different*/
-    function require(source, deps, target) {
+    function require(source, deps, target, fn) {
 
         var dm = new DM(source, deps, target);
         dm.ready = dm.ready(function(data) {
+            var deps = [];
             for (var dep in data) {
                 target[dep] = data[dep];
+                deps.push(data[dep]);
+            }
+
+            if (fn) {
+                fn.apply(null, deps);
             }
 
         });
+
         dm.resolve();
         return target;
     }

@@ -1,6 +1,7 @@
 var fb = {};
-describe('script loader', function() {
-    beforeEach(function(done) {
+xdescribe('script loader', function() {
+    var req;
+    beforeEach(function() {
         moduler.create(fb);
         fb.define('bar', function(greeter, m2) {
             return {
@@ -10,17 +11,16 @@ describe('script loader', function() {
                 }
             };
         }, ['greet', 'module2']);
-        setTimeout(function() {
-            done();
-        }, 4000);
     });
     it('should work', function() {
-        var msg = fb.require(['bar']);
-        expect(msg.bar.say('this is ')).toBe('this is module2!');
+        var req = fb.require(['greet'], {}, function(bar) {
+            expect(true).toBe(false);
+            expect(bar('some msg')).toBe('some msg');
+        });
     });
 });
-describe('script loader mixed', function() {
-
+xdescribe('script loader mixed', function() {
+    var req;
     beforeEach(function(done) {
         moduler.create(fb);
         fb.define('module3', function() {
@@ -37,12 +37,30 @@ describe('script loader mixed', function() {
             };
 
         }, ['greet', 'module3']);
-        setTimeout(function() {
-            done();
-        }, 1000);
     });
     it('should work with mixed modules', function() {
-        var msg = fb.require(['bar1']);
-        expect(msg.bar1.say('this is ')).toBe('this is module3!');
+        var req = fb.require(['bar1'], function(b) {
+            expect(b.say('this is ')).toBe('this is module3!');
+        });
+    });
+});
+describe('script loader - require', function() {
+    var req, f, msg;
+    beforeEach(function(done) {
+        moduler.create(fb);
+        var req = fb.require(['greet', 'module2'], {}, function(greeter, m2) {
+            f = {
+                name: 'bar',
+                say: function(msg) {
+                    return greeter(msg) + m2.name +  '!';
+                }
+            };
+            msg = greeter('foo' + m2.name);
+            done();
+        });
+    });
+    it('should work', function() {
+        expect(msg).toBe('foomodule2');
+        expect(f.say('bar module and ')).toBe('bar module and module2!');
     });
 });

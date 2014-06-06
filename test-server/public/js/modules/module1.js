@@ -3,3 +3,4 @@ moduler.define('module1', function() {
         console.log(msg);
     };
 });
+console.log('loading module1 from server');

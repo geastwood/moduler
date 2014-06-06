@@ -19,8 +19,8 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         ns.define = function(name, fn, deps) {
             return define.call(modules, name, fn, deps);
         };
-        ns.require = function(deps, options) {
-            return require.call(modules, deps, options);
+        ns.require = function(deps, options, fn) {
+            return require.call(modules, deps, options, fn);
         };
         ns.getModules = function() {
             return modules;
@@ -62,7 +62,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     };
 
-    var require = function(deps, options) {
+    var require = function(deps, options, fn) {
 
         if (!util.isArray(deps)) {
             throw new Error('Dependencies must be supplied as an array.');
@@ -71,7 +71,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         options = options || {};
 
         // we resovle currently empty object, if necessary we can augment exist module
-        return resolver.require(this/*source*/, deps, options.base || {});
+        return resolver.require(this/*source*/, deps, options.base || {}, fn);
 
     };
 

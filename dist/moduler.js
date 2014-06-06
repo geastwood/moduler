@@ -150,11 +150,16 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             dm.resolve();
         }
         /* this base is a bit different*/
-        function require(source, deps, target) {
+        function require(source, deps, target, fn) {
             var dm = new DM(source, deps, target);
             dm.ready = dm.ready(function (data) {
+                var deps = [];
                 for (var dep in data) {
                     target[dep] = data[dep];
+                    deps.push(data[dep]);
+                }
+                if (fn) {
+                    fn.apply(null, deps);
                 }
             });
             dm.resolve();
@@ -334,8 +339,8 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             ns.define = function (name, fn, deps) {
                 return define.call(modules, name, fn, deps);
             };
-            ns.require = function (deps, options) {
-                return require.call(modules, deps, options);
+            ns.require = function (deps, options, fn) {
+                return require.call(modules, deps, options, fn);
             };
             ns.getModules = function () {
                 return modules;
@@ -368,13 +373,13 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
             resolver.define(this, name, fn, deps, base);
         };
-        var require = function (deps, options) {
+        var require = function (deps, options, fn) {
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
             options = options || {};
             // we resovle currently empty object, if necessary we can augment exist module
-            return resolver.require(this, deps, options.base || {});
+            return resolver.require(this, deps, options.base || {}, fn);
         };
         // api
         return {

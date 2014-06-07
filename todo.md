@@ -8,4 +8,4 @@
 - path
 - shim
 - script loader error handling
-- maybe rename
+- maybe rename 'moduler' to ...

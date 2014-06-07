@@ -90,12 +90,12 @@ define(['dependencyManager'], function(DM) {
         return resolve(target, name, {action: 'set', obj: obj});
     }
 
-    function formatDeps(source) {
+    function formatDeps(source, target) {
         var deps = [];
         for (var dep in source) {
             if (source.hasOwnProperty(dep)) {
-                if (this) {
-                    this[dep] = source[dep];
+                if (target) {
+                    target[dep] = source[dep];
                 }
                 deps.push(source[dep]);
             }
@@ -107,7 +107,7 @@ define(['dependencyManager'], function(DM) {
 
         var dm = new DM(source, deps);
         dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps.call(null, data);
+            var deps = formatDeps(data);
             exports(source, name, fn.apply(base, deps));
         });
         dm.resolve();
@@ -119,7 +119,7 @@ define(['dependencyManager'], function(DM) {
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps.call(target, data);
+            var deps = formatDeps(data, target);
 
             if (fn) {
                 fn.apply(null, deps);

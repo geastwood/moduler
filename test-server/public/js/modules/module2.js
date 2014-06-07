@@ -1,6 +1,6 @@
-moduler.define('module2', function(m1) {
+moduler.define('module2', function(m1, m4) {
     return {
-        name: 'module2'
+        name: 'module2 requires: ' + m4.name
     };
-}, ['module1']);
+}, ['module1', 'module4']);
 console.log('loading module2 from server');

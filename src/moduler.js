@@ -16,7 +16,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         inherit: util.inherit,
         mixin: util.mixin,
         each: util.each,
-        exports: util.exports,
         extendCtor: util.extendCtor
     };
 
@@ -89,7 +88,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             return resolver.exports(target, name, obj);
         },
         extend: function(name, fn) {
-            foundation.register(name, fn);
+            foundation.register(name, fn, base);
         },
         debug: function() {
             console.dir(foundation);

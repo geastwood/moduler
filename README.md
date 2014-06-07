@@ -1,7 +1,7 @@
 moduler
 =======
 
-A small module manager.
+A module manager.
 
 ## define a module
 ```javascript
@@ -57,41 +57,4 @@ var dependency = foo.require(['bar']);
 
 // dependency will an object that containts 'bar' object
 'bar' in dependency; // log true
-```
-## augment an existing object with require
-```javascript
-// a simple object
-var base = {
-    name: 'base object',
-    fn: function() {
-        return this.name;
-    }
-};
-
-var foo = {};
-moduler.create(foo);
-//define a module
-foo.define('bar', function() {
-    return {
-        name: 'bar',
-        fn: function() {
-            return this.name + ' is another object';
-        }
-    };
-});
-
-// pass the base object
-foo.require(['bar'], {base: base});
-// now base object is augmented with bar object, similar to mixin function
-base.bar.fn(); // log 'bar is another object'
-```
-
-## alias
-Use '**as**' to alias a module when using '**require**'
-```javascript
-// providerd that a 'Person' constructor module is already defined
-// now alias 'Person' as 'P'
-var dependency = foo.require(['Person as P']);
-'P' in dependency; // log true
-'Person' in dependency; // log false
 ```

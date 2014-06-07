@@ -371,11 +371,8 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
     foundation = function () {
         var foundation = {
                 modules: {},
-                register: function (name, fn, deps) {
-                    // TODO
-                    // resolve deps
-                    // export to this.modules.name = fn.apply(null, [deps]);
-                    resolver.exports(this.modules, name, fn.call(null, this.modules));
+                register: function (name, fn, base) {
+                    resolver.exports(this.modules, name, fn.call(base, this.modules));
                 }
             };
         return foundation;
@@ -395,7 +392,6 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 inherit: util.inherit,
                 mixin: util.mixin,
                 each: util.each,
-                exports: util.exports,
                 extendCtor: util.extendCtor
             };
         var define = function (name, fn, deps) {
@@ -448,7 +444,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 return resolver.exports(target, name, obj);
             },
             extend: function (name, fn) {
-                foundation.register(name, fn);
+                foundation.register(name, fn, base);
             },
             debug: function () {
                 console.dir(foundation);

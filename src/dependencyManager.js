@@ -38,8 +38,8 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
         for (i = 0, len = this.deps.length; i < len; i++) {
 
             dep = this.deps[i];
-            moduleName = resolver.nameService.stripAlias(dep);
-            this.data[resolver.nameService.module(dep)] = null;
+            moduleName = resolver.nameService.module(dep);
+            this.data[moduleName] = null;
             aModule = resolver.resolve(this.source, moduleName, {action: 'get'});
 
             // give warning if the resolved module is empty
@@ -70,7 +70,7 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
      */
     DependencyManager.prototype.register = function repeat(depName) {
 
-        var aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(depName), {action: 'get'});
+        var aModule = resolver.resolve(this.source, resolver.nameService.module(depName), {action: 'get'});
         var that = this;
 
         if (!aModule) {

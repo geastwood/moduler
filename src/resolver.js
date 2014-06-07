@@ -8,36 +8,25 @@ define(['dependencyManager'], function(DM) {
     var nameService = (function () {
 
         var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-        var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
 
         return {
 
             module: function(name) {
 
-                var alias = MODULE_ALIAS_REGEX.exec(name);
                 var submodules;
 
-                // if there is alias name
-                if (alias) {
-                    return alias[2];
-                } else {
+                // if there is a submodule
+                submodules = MODULE_NAME_REGEX.exec(name);
 
-                    // if there is a submodule
-                    submodules = MODULE_NAME_REGEX.exec(name);
-
-                    if (submodules) {
-                        return name.split('.').pop();
-                    }
-
-                    return name;
+                if (submodules) {
+                    return name.split('.').pop();
                 }
+
+                return name;
+
             },
             parseModule: function(name) {
                 return MODULE_NAME_REGEX.exec(name);
-            },
-            stripAlias: function(name) {
-                var alias = MODULE_ALIAS_REGEX.exec(name);
-                return (alias) ? alias[1] : name;
             }
         };
     }());
@@ -113,21 +102,20 @@ define(['dependencyManager'], function(DM) {
         dm.resolve();
     }
 
-    function require(source, deps, target, fn) {
+    function require(source, deps, fn, ready) {
 
         var dm = new DM(source, deps);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps(data, target);
-
-            if (fn) {
-                fn.apply(null, deps);
+            var deps = formatDeps(data);
+            var rst = fn.apply(null, deps);
+            if (ready) {
+                ready(rst);
             }
         });
 
         dm.resolve();
-        return target;
     }
 
     // api

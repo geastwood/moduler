@@ -2,7 +2,6 @@ var fakeGlobal;
 beforeEach(function() {
     fakeGlobal = {name: 'fake global'};
 });
-
 describe('api', function() {
     it('should have static create', function() {
         expect(moduler.create).toBeDefined();
@@ -60,94 +59,82 @@ describe('static create function', function() {
     });
 
 });
-
-describe('define and require', function() {
-
+describe('constant of a module', function() {
     var foo;
-
     beforeEach(function() {
         foo = {};
         moduler.create(foo);
+    });
+
+    it('api', function() {
+        foo.define('foo', function() {
+            expect(this.constant.set).toBeDefined();
+            expect(this.constant.get).toBeDefined();
+            return {};
+        });
+    });
+    it('constant can only be defined once', function() {
         foo.define('bar', function() {
-            return {
-                name: 'bar',
-                hi: function() {
-                    return this.name + ' says i\'m bar';
-                }
-            };
+            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
+            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
+            return {};
         });
     });
-
-    describe('work with simple object', function() {
-
-        it('should work', function() {
-
-            var dep = foo.require(['bar']);
-            expect(dep.bar.name).toBe('bar');
-            expect(dep.bar.hi()).toBe('bar says i\'m bar');
-
-        });
-    });
-
-    describe('should work with constructor function', function() {
-
-        it('should work', function() {
-
-            foo.define('Person', function() {
-                var Person = function() {};
-                Person.prototype.name = 'John Doe';
-                Person.prototype.occupation = 'unemployed';
-                Person.prototype.introduce = function() {
-                    return 'My name is ' + this.name + ', and I\'m currently ' + this.occupation + '.';
-                };
-                return Person;
-            });
-
-            var dep = foo.require(['Person as P']);
-            var me = new dep.P();
-            expect(me.name).toBe('John Doe');
-            expect(me.introduce()).toBe('My name is John Doe, and I\'m currently unemployed.');
-            me.name = 'Fei Liu';
-            me.occupation = 'a web developer';
-            expect(me.name).toBe('Fei Liu');
-            expect(me.introduce()).toBe('My name is Fei Liu, and I\'m currently a web developer.');
-        });
-    });
-
-    describe('depencency', function() {
-
-        it('should work', function() {
-
-            foo.define('fb', function(bar) {
-
-                return {
-                    name: 'fb',
-                    hi: function() {
-                        return bar.name + ' ' + this.name;
-                    }
-                };
-            }, ['bar']);
-
-            var dep = foo.require(['fb']);
-            expect(dep.fb.name).toBe('fb');
-            expect(dep.fb.hi()).toBe('bar fb');
-        });
-    });
-
-    describe('alias', function() {
-
-        it('should work', function() {
-
-            var dep = foo.require(['bar as b']);
-            expect(dep.b.name).toBe('bar');
-            expect(dep.b.hi()).toBe('bar says i\'m bar');
-
-        });
-    });
-
 });
 
-describe('mutilple objects', function() {
+describe('require LOCAL constructor', function() {
+    var foo = {};
+    var s = 'this is a person speaking';
+    var rst, msg;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.define('greet', function() {
+            return function(thing) { return thing; };
+        });
+        foo.define('Person', function(greet) {
+            var Person = function() {};
+            Person.prototype.breath = 'air';
+            Person.prototype.speak = greet;
+            return Person;
+        }, ['greet']);
+        foo.require(['Person'], function(P) { // return callback
+            var p1 = new P();
+            return p1;
+        }, function(p1) { // ready callback
+            rst = p1.breath;
+            msg = p1.speak(s);
+            done();
+        });
+    });
+
+    it('should work', function() {
+        expect(rst).toBe('air');
+        expect(msg).toBe(s);
+    });
+});
+
+describe('require REMOTE constructor', function() {
+    var foo = {};
+    var s = 'this is a person speaking';
+    var rst, msg;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.require(['Person'], function(P) { // return callback
+            var p1 = new P();
+            return p1;
+        }, function(p1) { // ready callback
+            rst = p1.breath;
+            msg = p1.speak(s);
+            done();
+        });
+    });
+    it('should work', function() {
+        expect(rst).toBe('air');
+        expect(msg).toBe(s + '.');
+    });
+});
+/*
+xdescribe('mutilple objects', function() {
 
     var foo, bar;
     beforeEach(function() {
@@ -178,54 +165,4 @@ describe('mutilple objects', function() {
 
 });
 
-describe('augment object with require', function() {
-
-    var foo;
-    var baseObject = {
-        name: 'baseObject'
-    };
-    beforeEach(function() {
-        foo = {};
-        moduler.create(foo);
-        foo.define('bar', function() {
-            return {
-                name: 'bar',
-                description: 'should be added to base object',
-                fn: function() {
-                    return this.name + ' should match as well.';
-                }
-            };
-        });
-    });
-    it('should augment baseObject', function() {
-        foo.require(['bar'], {base: baseObject});
-        expect(baseObject.name).toBe('baseObject');
-        expect(baseObject.bar.name).toBe('bar');
-        expect(baseObject.bar.description).toBe('should be added to base object');
-        expect(baseObject.bar.fn()).toBe('bar should match as well.');
-    });
-});
-
-describe('constant of a module', function() {
-    var foo;
-    beforeEach(function() {
-        foo = {};
-        moduler.create(foo);
-    });
-
-    it('api', function() {
-        foo.define('foo', function() {
-            expect(this.constant.set).toBeDefined();
-            expect(this.constant.get).toBeDefined();
-            return {};
-        });
-    });
-    it('constant can only be defined once', function() {
-        foo.define('bar', function() {
-            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
-            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
-            return {};
-        });
-    });
-});
-
+*/

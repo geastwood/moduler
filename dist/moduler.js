@@ -56,8 +56,8 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
             for (i = 0, len = this.deps.length; i < len; i++) {
                 dep = this.deps[i];
-                moduleName = resolver.nameService.stripAlias(dep);
-                this.data[resolver.nameService.module(dep)] = null;
+                moduleName = resolver.nameService.module(dep);
+                this.data[moduleName] = null;
                 aModule = resolver.resolve(this.source, moduleName, { action: 'get' });
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
@@ -80,7 +80,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
          * @return undefined
          */
         DependencyManager.prototype.register = function repeat(depName) {
-            var aModule = resolver.resolve(this.source, resolver.nameService.stripAlias(depName), { action: 'get' });
+            var aModule = resolver.resolve(this.source, resolver.nameService.module(depName), { action: 'get' });
             var that = this;
             if (!aModule) {
                 // if the module at this point is "undefined" that means the loaded module has dependencies of other modules
@@ -135,29 +135,18 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
     resolver = function (DM) {
         var nameService = function () {
                 var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-                var MODULE_ALIAS_REGEX = /(\S+)\ as\ (\w+)/;
                 return {
                     module: function (name) {
-                        var alias = MODULE_ALIAS_REGEX.exec(name);
                         var submodules;
-                        // if there is alias name
-                        if (alias) {
-                            return alias[2];
-                        } else {
-                            // if there is a submodule
-                            submodules = MODULE_NAME_REGEX.exec(name);
-                            if (submodules) {
-                                return name.split('.').pop();
-                            }
-                            return name;
+                        // if there is a submodule
+                        submodules = MODULE_NAME_REGEX.exec(name);
+                        if (submodules) {
+                            return name.split('.').pop();
                         }
+                        return name;
                     },
                     parseModule: function (name) {
                         return MODULE_NAME_REGEX.exec(name);
-                    },
-                    stripAlias: function (name) {
-                        var alias = MODULE_ALIAS_REGEX.exec(name);
-                        return alias ? alias[1] : name;
                     }
                 };
             }();
@@ -219,17 +208,17 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             });
             dm.resolve();
         }
-        function require(source, deps, target, fn) {
+        function require(source, deps, fn, ready) {
             var dm = new DM(source, deps);
             // define a ready callback with "registerReadyCb" function provided by DependencyManager object
             dm.ready = dm.registerReadyCb(function (data) {
-                var deps = formatDeps(data, target);
-                if (fn) {
-                    fn.apply(null, deps);
+                var deps = formatDeps(data);
+                var rst = fn.apply(null, deps);
+                if (ready) {
+                    ready(rst);
                 }
             });
             dm.resolve();
-            return target;
         }
         // api
         return {
@@ -394,26 +383,6 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
     moduler = function (Constant) {
         
         var bindDefineModule = null;
-        var moduleManager = function (ns) {
-            var modules = {};
-            // augument default "modules" object with foundation's methods
-            util.mixin(modules, foundation.modules);
-            var config = {};
-            var setup = function (fn) {
-                fn(config);
-            };
-            ns.define = function (name, fn, deps) {
-                return define.call(modules, name, fn, deps);
-            };
-            ns.require = function (deps, options, fn) {
-                return require.call(modules, deps, options, fn);
-            };
-            ns.getModules = function () {
-                return modules;
-            };
-            ns.setup = setup;
-            return ns;
-        };
         // will be bind with 'this' when defining modules
         var base = {
                 constant: function () {
@@ -430,7 +399,6 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 extendCtor: util.extendCtor
             };
         var define = function (name, fn, deps) {
-            var args;
             deps = deps || [];
             if (!name) {
                 throw new Error('Module name is required when defining a module.');
@@ -440,13 +408,33 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
             resolver.define(this, name, fn, deps, base);
         };
-        var require = function (deps, options, fn) {
+        var require = function (deps, fn, ready, options) {
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
             options = options || {};
             // we resovle currently empty object, if necessary we can augment exist module
-            return resolver.require(this, deps, options.base || {}, fn);
+            return resolver.require(this, deps, fn, ready, options);
+        };
+        var moduleManager = function (ns) {
+            var modules = {};
+            // augument default "modules" object with foundation's methods
+            util.mixin(modules, foundation.modules);
+            var config = {};
+            var setup = function (fn) {
+                fn(config);
+            };
+            ns.define = function (name, fn, deps) {
+                return define.call(modules, name, fn, deps);
+            };
+            ns.require = function (deps, fn, ready, options) {
+                return require.call(modules, deps, fn, ready, options);
+            };
+            ns.getModules = function () {
+                return modules;
+            };
+            ns.setup = setup;
+            return ns;
         };
         // api
         return {

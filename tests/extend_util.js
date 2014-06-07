@@ -1,4 +1,4 @@
-describe('extend util', function() {
+xdescribe('extend util', function() {
     var foo = {}, bar = {}, depFoo, depBar;
     beforeEach(function() {
         moduler.create(foo);

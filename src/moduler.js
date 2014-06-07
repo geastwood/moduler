@@ -3,32 +3,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
     'use strict';
 
     var bindDefineModule = null;
-    var moduleManager = function(ns) {
-
-        var modules = {};
-
-        // augument default "modules" object with foundation's methods
-        util.mixin(modules, foundation.modules);
-
-        var config = {};
-
-        var setup = function(fn) {
-            fn(config);
-        };
-
-        ns.define = function(name, fn, deps) {
-            return define.call(modules, name, fn, deps);
-        };
-        ns.require = function(deps, options, fn) {
-            return require.call(modules, deps, options, fn);
-        };
-        ns.getModules = function() {
-            return modules;
-        };
-        ns.setup = setup;
-
-        return ns;
-    };
 
     // will be bind with 'this' when defining modules
     var base = {
@@ -48,7 +22,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     var define = function(name, fn, deps) {
 
-        var args;
         deps = deps || [];
 
         if (!name) {
@@ -63,7 +36,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     };
 
-    var require = function(deps, options, fn) {
+    var require = function(deps, fn, ready, options) {
 
         if (!util.isArray(deps)) {
             throw new Error('Dependencies must be supplied as an array.');
@@ -72,8 +45,35 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         options = options || {};
 
         // we resovle currently empty object, if necessary we can augment exist module
-        return resolver.require(this/*source*/, deps, options.base || {}, fn);
+        return resolver.require(this/* source */, deps, fn, ready, options);
 
+    };
+
+    var moduleManager = function(ns) {
+
+        var modules = {};
+
+        // augument default "modules" object with foundation's methods
+        util.mixin(modules, foundation.modules);
+
+        var config = {};
+
+        var setup = function(fn) {
+            fn(config);
+        };
+
+        ns.define = function(name, fn, deps) {
+            return define.call(modules, name, fn, deps);
+        };
+        ns.require = function(deps, fn, ready, options) {
+            return require.call(modules, deps, fn, ready, options);
+        };
+        ns.getModules = function() {
+            return modules;
+        };
+        ns.setup = setup;
+
+        return ns;
     };
 
     // api

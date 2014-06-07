@@ -1,7 +1,8 @@
 - ~~script tag~~
 - ~~cache~~
-- adapt require api to add ready callback and adapt tests
-- remove require augment base object
+- ~~adapt require api to add ready callback and adapt tests~~
+- ~~remove require augment base object~~
+- remove alias
 - module blacklist
 - module config
 - combo handler

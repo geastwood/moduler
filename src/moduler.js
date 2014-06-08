@@ -4,14 +4,10 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
     var bindDefineModule = null;
 
-    // will be bind with 'this' when defining modules
-    var utilHelper = {
-        inherit: util.inherit,
-        mixin: util.mixin,
-        each: util.each,
-        extendCtor: util.extendCtor
-    };
-
+    /**
+     * Delegate to resolver.define
+     * This function is for some valiations
+     */
     var define = function(name, fn, deps) {
 
         deps = deps || [];
@@ -25,10 +21,13 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         }
 
         // delegate define method to resolver's define
-        resolver.define(this/* envelop */, name, fn, deps);
-
+        resolver.define(this/* envelope */, name, fn, deps);
     };
 
+    /**
+     * Delegate to resolver.require
+     * This function is for some validations
+     */
     var require = function(deps, fn, ready, options) {
 
         if (!util.isArray(deps)) {
@@ -38,8 +37,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         options = options || {};
 
         // delegate require moethod to resolver's require method
-        return resolver.require(this/* envelop */, deps, fn, ready, options);
-
+        return resolver.require(this/* envelope */, deps, fn, ready, options);
     };
 
     var moduleManager = function(ns) {
@@ -64,25 +62,44 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             };
         }());
 
-        var envelop = {
+        /**
+         * envelope will be passed through during the module resolve process,
+         * if certain data need to be passed around, can be attached to this object
+         */
+        var envelope = {
             modules: modules,
-            util: utilHelper,
+            util: util,
             config: config,
             constant: constant
         };
 
         /**
-         * Attach define to module
+         * Attach define to module, first delegate to define method in 'moduler', then to 'resolver.define'
+         * "this" will be binded with "envelope" object
+         *
+         * @param name      String      name of the module
+         * @param ready     Function    Module defining function, which returns the object
+         * @param deps      Array       array of dependencies
+         *
+         * @return undefined
          */
         ns.define = function(name, fn, deps) {
-            return define.call(envelop, name, fn, deps);
+            return define.call(envelope, name, fn, deps);
         };
 
         /**
-         * Attach require to module
+         * Attach require to module, first delegate to require method in 'moduler', then to 'resolver.require'
+         * "this" will be binded with "envelope" object
+         *
+         * @param deps      Array       collection of dependencies
+         * @param fn        Function    callback
+         * @param ready     Function    ready callback, called when loaded module is ready
+         * @param options   Object      options
+         *
+         * @return undefined
          */
         ns.require = function(deps, fn, ready, options) {
-            return require.call(envelop, deps, fn, ready, options);
+            return require.call(envelope, deps, fn, ready, options);
         };
 
         /**
@@ -127,7 +144,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         define: function(name, fn, deps) {
 
             if (bindDefineModule === null) {
-                console.warn('Bind Define module is not set');
+                console.warn('Bind Define module is not set.');
             }
             return define.call(bindDefineModule, name, fn, deps);
         }

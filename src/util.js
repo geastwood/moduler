@@ -1,8 +1,8 @@
 define(function() {
 
-    var hasOwn = Object.prototype.hasOwnProperty;
-    var ostring = Object.prototype.toString;
-    var nativeForEach = Array.prototype.forEach;
+    var hasOwn = Object.prototype.hasOwnProperty,
+        ostring = Object.prototype.toString,
+        nativeForEach = Array.prototype.forEach;
 
     function hasProp(obj, prop) {
         hasOwn.call(obj, prop);

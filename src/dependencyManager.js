@@ -70,8 +70,8 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
      */
     DependencyManager.prototype.register = function repeat(depName) {
 
-        var aModule = resolver.resolve(this.source.modules, resolver.nameService.module(depName), {action: 'get'});
-        var that = this;
+        var aModule = resolver.resolve(this.source.modules, resolver.nameService.module(depName), {action: 'get'}),
+            that = this;
 
         if (!aModule) {
 

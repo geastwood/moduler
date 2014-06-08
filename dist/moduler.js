@@ -4,17 +4,17 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
     scriptLoader = function () {
         var ScriptLoader = function (url, ns, onLoadCallback, name) {
             this.url = url;
-            /* url of the module */
+            // url of the module
             this.ns = ns;
-            /* source obj/ns obj to bind 'define' method */
+            // source obj/ns obj to bind 'define' method
             this.onLoadCallback = onLoadCallback;
             this.name = name;
+            // dependency name
             this.load();
         };
         // TODO: add cross-browser support
         ScriptLoader.prototype.load = function () {
-            var script = document.createElement('script');
-            var that = this;
+            var script = document.createElement('script'), that = this;
             script.src = this.url;
             moduler.bindDefine(this.ns);
             script.onload = function () {
@@ -80,8 +80,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
          * @return undefined
          */
         DependencyManager.prototype.register = function repeat(depName) {
-            var aModule = resolver.resolve(this.source.modules, resolver.nameService.module(depName), { action: 'get' });
-            var that = this;
+            var aModule = resolver.resolve(this.source.modules, resolver.nameService.module(depName), { action: 'get' }), that = this;
             if (!aModule) {
                 // if the module at this point is "undefined" that means the loaded module has dependencies of other modules
                 // so register a recursive call to check the availablity of it's dependencies until it become available
@@ -133,6 +132,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         return DependencyManager;
     }(scriptLoader);
     resolver = function (DM) {
+        //TODO: may need refactoring
         var nameService = function () {
                 var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
                 return {
@@ -208,24 +208,28 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             };
         }
         function define(source, name, fn, deps) {
-            var dm = new DM(source, deps);
-            dm.ready = dm.registerReadyCb(function (data) {
-                var deps = formatDeps(data);
-                exports(source.modules, name, fn.apply(buildBind(source), deps));
-            });
-            dm.resolve();
-        }
-        function require(source, deps, fn, ready) {
+            // use a new dependencyManager to resolver the dependencies
             var dm = new DM(source, deps);
             // define a ready callback with "registerReadyCb" function provided by DependencyManager object
             dm.ready = dm.registerReadyCb(function (data) {
                 var deps = formatDeps(data);
-                var newBase = buildBind(source);
-                var rst = fn.apply(newBase, deps);
+                exports(source.modules, name, fn.apply(buildBind(source), deps));
+            });
+            // resolve the dependency
+            dm.resolve();
+        }
+        function require(source, deps, fn, ready) {
+            // use a new dependencyManager to resolver the dependencies
+            var dm = new DM(source, deps);
+            // define a ready callback with "registerReadyCb" function provided by DependencyManager object
+            dm.ready = dm.registerReadyCb(function (data) {
+                var deps = formatDeps(data), bind = buildBind(source), rst = fn.apply(bind, deps);
                 if (ready) {
-                    ready.call(newBase, rst);
+                    // call ready callback, if there is one
+                    ready.call(bind, rst);
                 }
             });
+            // resolve the dependency
             dm.resolve();
         }
         // api
@@ -238,9 +242,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         };
     }(dependencyManager);
     util = function () {
-        var hasOwn = Object.prototype.hasOwnProperty;
-        var ostring = Object.prototype.toString;
-        var nativeForEach = Array.prototype.forEach;
+        var hasOwn = Object.prototype.hasOwnProperty, ostring = Object.prototype.toString, nativeForEach = Array.prototype.forEach;
         function hasProp(obj, prop) {
             hasOwn.call(obj, prop);
         }
@@ -388,13 +390,10 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
     moduler = function (Constant) {
         
         var bindDefineModule = null;
-        // will be bind with 'this' when defining modules
-        var utilHelper = {
-                inherit: util.inherit,
-                mixin: util.mixin,
-                each: util.each,
-                extendCtor: util.extendCtor
-            };
+        /**
+         * Delegate to resolver.define
+         * This function is for some valiations
+         */
         var define = function (name, fn, deps) {
             deps = deps || [];
             if (!name) {
@@ -406,6 +405,10 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             // delegate define method to resolver's define
             resolver.define(this, name, fn, deps);
         };
+        /**
+         * Delegate to resolver.require
+         * This function is for some validations
+         */
         var require = function (deps, fn, ready, options) {
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
@@ -430,23 +433,42 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                         set: constant.set
                     };
                 }();
-            var envelop = {
+            /**
+             * envelope will be passed through during the module resolve process,
+             * if certain data need to be passed around, can be attached to this object
+             */
+            var envelope = {
                     modules: modules,
-                    util: utilHelper,
+                    util: util,
                     config: config,
                     constant: constant
                 };
             /**
-             * Attach define to module
+             * Attach define to module, first delegate to define method in 'moduler', then to 'resolver.define'
+             * "this" will be binded with "envelope" object
+             *
+             * @param name      String      name of the module
+             * @param ready     Function    Module defining function, which returns the object
+             * @param deps      Array       array of dependencies
+             *
+             * @return undefined
              */
             ns.define = function (name, fn, deps) {
-                return define.call(envelop, name, fn, deps);
+                return define.call(envelope, name, fn, deps);
             };
             /**
-             * Attach require to module
+             * Attach require to module, first delegate to require method in 'moduler', then to 'resolver.require'
+             * "this" will be binded with "envelope" object
+             *
+             * @param deps      Array       collection of dependencies
+             * @param fn        Function    callback
+             * @param ready     Function    ready callback, called when loaded module is ready
+             * @param options   Object      options
+             *
+             * @return undefined
              */
             ns.require = function (deps, fn, ready, options) {
-                return require.call(envelop, deps, fn, ready, options);
+                return require.call(envelope, deps, fn, ready, options);
             };
             /**
              * Give module a constant function
@@ -485,7 +507,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             },
             define: function (name, fn, deps) {
                 if (bindDefineModule === null) {
-                    console.warn('Bind Define module is not set');
+                    console.warn('Bind Define module is not set.');
                 }
                 return define.call(bindDefineModule, name, fn, deps);
             }

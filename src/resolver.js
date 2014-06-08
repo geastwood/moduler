@@ -1,10 +1,12 @@
 /**
  * resolver
  * use to resolve namespaces
+ * use for delegations of define and require method
  * set or get object for namespaces
  */
 define(['dependencyManager'], function(DM) {
 
+    //TODO: may need refactoring
     var nameService = (function () {
 
         var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
@@ -71,7 +73,6 @@ define(['dependencyManager'], function(DM) {
 
     }
 
-
     /**
      * exports function, delegate to set action of resolve function
      */
@@ -102,28 +103,36 @@ define(['dependencyManager'], function(DM) {
 
     function define(source, name, fn, deps) {
 
-        var dm = new DM(source, deps);
-        dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps(data);
-            exports(source.modules, name, fn.apply(buildBind(source), deps));
-        });
-        dm.resolve();
-    }
-
-    function require(source, deps, fn, ready) {
-
+        // use a new dependencyManager to resolver the dependencies
         var dm = new DM(source, deps);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
             var deps = formatDeps(data);
-            var newBase = buildBind(source);
-            var rst = fn.apply(newBase, deps);
-            if (ready) {
-                ready.call(newBase, rst);
+            exports(source.modules, name, fn.apply(buildBind(source), deps));
+        });
+
+        // resolve the dependency
+        dm.resolve();
+    }
+
+    function require(source, deps, fn, ready) {
+
+        // use a new dependencyManager to resolver the dependencies
+        var dm = new DM(source, deps);
+
+        // define a ready callback with "registerReadyCb" function provided by DependencyManager object
+        dm.ready = dm.registerReadyCb(function(data) {
+            var deps = formatDeps(data),
+                bind = buildBind(source),
+                rst = fn.apply(bind, deps);
+
+            if (ready) { // call ready callback, if there is one
+                ready.call(bind, rst);
             }
         });
 
+        // resolve the dependency
         dm.resolve();
     }
 
@@ -135,5 +144,4 @@ define(['dependencyManager'], function(DM) {
         require: require,
         exports: exports
     };
-
 });

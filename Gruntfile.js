@@ -6,6 +6,7 @@ module.exports = function(grunt) {
             src: ['dist/moduler.js', 'extensions/*.js'],
             options: {
                 specs: ['tests/moduler.js',
+                        'tests/constant.js',
                         'tests/extend_util.js',
                         'tests/base.js',
                         'tests/script_loader.js']

@@ -208,14 +208,14 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             });
             dm.resolve();
         }
-        function require(source, deps, fn, ready) {
+        function require(source, deps, base, fn, ready) {
             var dm = new DM(source, deps);
             // define a ready callback with "registerReadyCb" function provided by DependencyManager object
             dm.ready = dm.registerReadyCb(function (data) {
                 var deps = formatDeps(data);
-                var rst = fn.apply(null, deps);
+                var rst = fn.apply(base, deps);
                 if (ready) {
-                    ready(rst);
+                    ready.call(base, rst);
                 }
             });
             dm.resolve();
@@ -381,20 +381,13 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         
         var bindDefineModule = null;
         // will be bind with 'this' when defining modules
-        var base = {
-                constant: function () {
-                    var constant = new Constant();
-                    return {
-                        get: constant.get,
-                        set: constant.set
-                    };
-                }(),
+        var utilHelper = {
                 inherit: util.inherit,
                 mixin: util.mixin,
                 each: util.each,
                 extendCtor: util.extendCtor
             };
-        var define = function (name, fn, deps) {
+        var define = function (name, fn, deps, base) {
             deps = deps || [];
             if (!name) {
                 throw new Error('Module name is required when defining a module.');
@@ -404,13 +397,13 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             }
             resolver.define(this, name, fn, deps, base);
         };
-        var require = function (deps, fn, ready, options) {
+        var require = function (deps, base, fn, ready, options) {
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
             options = options || {};
             // we resovle currently empty object, if necessary we can augment exist module
-            return resolver.require(this, deps, fn, ready, options);
+            return resolver.require(this, deps, base, fn, ready, options);
         };
         var moduleManager = function (ns) {
             var modules = {};
@@ -420,12 +413,25 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             var setup = function (fn) {
                 fn(config);
             };
+            var constant = function () {
+                    var constant = new Constant();
+                    return {
+                        get: constant.get,
+                        set: constant.set
+                    };
+                }();
+            var base = {
+                    util: utilHelper,
+                    constant: constant,
+                    config: config
+                };
             ns.define = function (name, fn, deps) {
-                return define.call(modules, name, fn, deps);
+                return define.call(modules, name, fn, deps, base);
             };
             ns.require = function (deps, fn, ready, options) {
-                return require.call(modules, deps, fn, ready, options);
+                return require.call(modules, deps, base, fn, ready, options);
             };
+            ns.constant = base.constant;
             ns.debug = {
                 getModules: function () {
                     return modules;
@@ -449,7 +455,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
                 return resolver.exports(target, name, obj);
             },
             extend: function (name, fn) {
-                foundation.register(name, fn, base);
+                foundation.register(name, fn);
             },
             bindDefine: function (target, isNs) {
                 if (isNs) {

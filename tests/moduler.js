@@ -59,28 +59,6 @@ describe('static create function', function() {
     });
 
 });
-describe('constant of a module', function() {
-    var foo;
-    beforeEach(function() {
-        foo = {};
-        moduler.create(foo);
-    });
-
-    it('api', function() {
-        foo.define('foo', function() {
-            expect(this.constant.set).toBeDefined();
-            expect(this.constant.get).toBeDefined();
-            return {};
-        });
-    });
-    it('constant can only be defined once', function() {
-        foo.define('bar', function() {
-            expect(this.constant.set('foo', 'foo is a constant')).toBe(true);
-            expect(this.constant.set('foo', 'should not be able to set')).toBe(false);
-            return {};
-        });
-    });
-});
 
 describe('require LOCAL constructor', function() {
     var foo = {};
@@ -131,6 +109,37 @@ describe('require REMOTE constructor', function() {
     it('should work', function() {
         expect(rst).toBe('air');
         expect(msg).toBe(s + '.');
+    });
+});
+describe('require REMOTE module without "ready" callback', function() {
+    var foo = {};
+    var rst;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.require(['greet'], function(greet) {
+            rst = greet;
+            done();
+        });
+    });
+    it('should work', function() {
+        expect(rst('works')).toBe('works.');
+    });
+});
+describe('require REMOTE module without "ready" callback', function() {
+    var foo = {};
+    var rst;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.require(['greet'], function(greet) {
+            return greet;
+        }, function(greet) {
+            this.constant.set('bar', 'constant bar');
+            rst = this.constant.get('bar');
+            done();
+        });
+    });
+    it('"this" should point to "base" object', function() {
+        expect(rst).toBe('constant bar');
     });
 });
 /*

@@ -102,16 +102,16 @@ define(['dependencyManager'], function(DM) {
         dm.resolve();
     }
 
-    function require(source, deps, fn, ready) {
+    function require(source, deps, base, fn, ready) {
 
         var dm = new DM(source, deps);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
             var deps = formatDeps(data);
-            var rst = fn.apply(null, deps);
+            var rst = fn.apply(base, deps);
             if (ready) {
-                ready(rst);
+                ready.call(base, rst);
             }
         });
 

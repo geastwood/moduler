@@ -67,8 +67,13 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         ns.require = function(deps, fn, ready, options) {
             return require.call(modules, deps, fn, ready, options);
         };
-        ns.getModules = function() {
-            return modules;
+        ns.debug = {
+            getModules: function() {
+                return modules;
+            },
+            showFoundation: function() {
+                return foundation;
+            }
         };
         ns.setup = setup;
 
@@ -89,9 +94,6 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         },
         extend: function(name, fn) {
             foundation.register(name, fn, base);
-        },
-        debug: function() {
-            console.dir(foundation);
         },
         bindDefine: function(target, isNs) {
             if (isNs) {

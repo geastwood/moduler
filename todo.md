@@ -2,10 +2,9 @@
 - ~~cache~~
 - ~~adapt require api to add ready callback and adapt tests~~
 - ~~remove require augment base object~~
-- remove alias
 - finish foundation (more tests)
-- script tag cross reference
-- ??module blacklist??
+- remove alias
+- module blacklist
 - module config
 - combo handler
 - path

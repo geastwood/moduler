@@ -28,7 +28,6 @@ describe('more on constant', function() {
         foo.constant.set('c1', 'constant1');
         foo.constant.set('c2', 'constant2');
         foo.require(['Person'], function(Person) {
-            var p = new Person();
             asyncRst1 = this.constant.get('c1');
             asyncRst2 = this.constant.get('c2');
             done();
@@ -45,9 +44,25 @@ describe('more on constant', function() {
         expect(asyncRst2).toBe('constant2');
     });
 });
+describe('constant in dynmaic script', function() {
+    var foo = {};
+    var rst;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.constant.set('c0', 'constant1 in foo');
+        foo.require(['constantInDynamicScript'], function(global) {
+            rst = global;
+            done();
+        });
+    });
+    it('should work', function() {
+        expect(rst.constant).toBeDefined();
+        expect(rst.constant.get('c0')).toBe('constant1 in foo');
+    });
+});
 describe('different modules share utils but not constant', function() {
     var foo = {}, bar = {};
-    var asyncRst1, asyncRst2;
+    var asyncRst1, asyncRst2, p;
     beforeEach(function(done) {
         moduler.create(foo);
         moduler.create(bar);
@@ -56,18 +71,25 @@ describe('different modules share utils but not constant', function() {
         bar.constant.set('c1', 'constant1 in bar');
         bar.constant.set('c2', 'constant2 in bar');
         foo.require(['Person'], function(Person) {
-            var p = new Person();
+            p = new Person();
+            this.constant.set('c3', 'constant of foo set in require method');
             asyncRst1 = this.constant.get('c1');
             asyncRst2 = this.constant.get('c2');
             done();
         });
     });
     it('share utils', function() {
+        expect(p.speak('thing')).toBe('thing.');
         foo.define('bar', function() {
+            this.util.dummyMethod = function() {
+                return 'dummy';
+            };
             expect(this.constant.get('c1')).toBe('constant1 in foo');
             expect(this.constant.get('c2')).toBe('constant2 in foo');
+            expect(this.constant.get('c3')).toBe('constant of foo set in require method');
         });
         bar.define('bar', function() {
+            expect(this.util.dummyMethod()).toBe('dummy');
             expect(this.constant.get('c1')).toBe('constant1 in bar');
             expect(this.constant.get('c2')).toBe('constant2 in bar');
         });

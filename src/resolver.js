@@ -92,26 +92,35 @@ define(['dependencyManager'], function(DM) {
         return deps;
     }
 
-    function define(source, name, fn, deps, base) {
+    function buildBind(source) {
+        return {
+            constant: source.constant,
+            config: source.config,
+            util: source.util
+        };
+    }
+
+    function define(source, name, fn, deps) {
 
         var dm = new DM(source, deps);
         dm.ready = dm.registerReadyCb(function(data) {
             var deps = formatDeps(data);
-            exports(source, name, fn.apply(base, deps));
+            exports(source.modules, name, fn.apply(buildBind(source), deps));
         });
         dm.resolve();
     }
 
-    function require(source, deps, base, fn, ready) {
+    function require(source, deps, fn, ready) {
 
         var dm = new DM(source, deps);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
             var deps = formatDeps(data);
-            var rst = fn.apply(base, deps);
+            var newBase = buildBind(source);
+            var rst = fn.apply(newBase, deps);
             if (ready) {
-                ready.call(base, rst);
+                ready.call(newBase, rst);
             }
         });
 

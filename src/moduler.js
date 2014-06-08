@@ -12,7 +12,7 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         extendCtor: util.extendCtor
     };
 
-    var define = function(name, fn, deps, base) {
+    var define = function(name, fn, deps) {
 
         deps = deps || [];
 
@@ -24,11 +24,12 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             throw new Error('Dependencies must be supplied as an array.');
         }
 
-        resolver.define(this/*source*/, name, fn, deps, base);
+        // delegate define method to resolver's define
+        resolver.define(this/* envelop */, name, fn, deps);
 
     };
 
-    var require = function(deps, base, fn, ready, options) {
+    var require = function(deps, fn, ready, options) {
 
         if (!util.isArray(deps)) {
             throw new Error('Dependencies must be supplied as an array.');
@@ -36,13 +37,14 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
 
         options = options || {};
 
-        // we resovle currently empty object, if necessary we can augment exist module
-        return resolver.require(this/* source */, deps, base, fn, ready, options);
+        // delegate require moethod to resolver's require method
+        return resolver.require(this/* envelop */, deps, fn, ready, options);
 
     };
 
     var moduleManager = function(ns) {
 
+        // private module container
         var modules = {};
 
         // augument default "modules" object with foundation's methods
@@ -62,18 +64,35 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
             };
         }());
 
-        var base = {
+        var envelop = {
+            modules: modules,
             util: utilHelper,
-            constant: constant,
-            config: config
+            config: config,
+            constant: constant
         };
+
+        /**
+         * Attach define to module
+         */
         ns.define = function(name, fn, deps) {
-            return define.call(modules, name, fn, deps, base);
+            return define.call(envelop, name, fn, deps);
         };
+
+        /**
+         * Attach require to module
+         */
         ns.require = function(deps, fn, ready, options) {
-            return require.call(modules, deps, base, fn, ready, options);
+            return require.call(envelop, deps, fn, ready, options);
         };
-        ns.constant = base.constant;
+
+        /**
+         * Give module a constant function
+         */
+        ns.constant = constant;
+
+        /**
+         * Give module some debug methods
+         */
         ns.debug = {
             getModules: function() {
                 return modules;
@@ -102,19 +121,15 @@ define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, 
         extend: function(name, fn) {
             foundation.register(name, fn);
         },
-        bindDefine: function(target, isNs) {
-            if (isNs) {
-                bindDefineModule = target.getModules();
-            } else {
-                bindDefineModule = target;
-            }
+        bindDefine: function(target) {
+            bindDefineModule = target;
         },
         define: function(name, fn, deps) {
+
             if (bindDefineModule === null) {
                 console.warn('Bind Define module is not set');
             }
             return define.call(bindDefineModule, name, fn, deps);
         }
     };
-
 });

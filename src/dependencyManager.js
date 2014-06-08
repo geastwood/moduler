@@ -40,7 +40,7 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
             dep = this.deps[i];
             moduleName = resolver.nameService.module(dep);
             this.data[moduleName] = null;
-            aModule = resolver.resolve(this.source, moduleName, {action: 'get'});
+            aModule = resolver.resolve(this.source.modules, moduleName, {action: 'get'});
 
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
@@ -70,7 +70,7 @@ define(['resolver', 'scriptLoader'], function(resolver, SL) {
      */
     DependencyManager.prototype.register = function repeat(depName) {
 
-        var aModule = resolver.resolve(this.source, resolver.nameService.module(depName), {action: 'get'});
+        var aModule = resolver.resolve(this.source.modules, resolver.nameService.module(depName), {action: 'get'});
         var that = this;
 
         if (!aModule) {

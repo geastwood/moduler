@@ -60,6 +60,24 @@ describe('constant in dynmaic script', function() {
         expect(rst.constant.get('c0')).toBe('constant1 in foo');
     });
 });
+describe('constant in dynmaic script in ready callback', function() {
+    var foo = {};
+    var rst;
+    beforeEach(function(done) {
+        moduler.create(foo);
+        foo.constant.set('c0', 'constant1 in foo');
+        foo.require(['constantInDynamicScript'], function(global) {
+            return global;
+        }, function(global) {
+            rst = global;
+            done();
+        });
+    });
+    it('should work', function() {
+        expect(rst.constant).toBeDefined();
+        expect(rst.constant.get('c0')).toBe('constant1 in foo');
+    });
+});
 describe('different modules share utils but not constant', function() {
     var foo = {}, bar = {};
     var asyncRst1, asyncRst2, p;

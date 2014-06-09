@@ -39,10 +39,9 @@
         </div>
 
         <h1>
-<a name="moduler-" class="anchor" href="#moduler-"><span class="octicon octicon-link"></span></a>moduler <a href="https://travis-ci.org/geastwood/tokenlist"><img src="https://travis-ci.org/geastwood/tokenlist.svg?branch=master" alt="Build Status"></a>
-</h1>
+<a name="moduler" class="anchor" href="#moduler"><span class="octicon octicon-link"></span></a>moduler</h1>
 
-<p>A small module manager.</p>
+<p>A module manager.</p>
 
 <h2>
 <a name="define-a-module" class="anchor" href="#define-a-module"><span class="octicon octicon-link"></span></a>define a module</h2>
@@ -107,47 +106,6 @@
 
 <span class="c1">// dependency will an object that containts 'bar' object</span>
 <span class="s1">'bar'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log true</span>
-</pre></div>
-
-<h2>
-<a name="augment-an-existing-object-with-require" class="anchor" href="#augment-an-existing-object-with-require"><span class="octicon octicon-link"></span></a>augment an existing object with require</h2>
-
-<div class="highlight highlight-javascript"><pre><span class="c1">// a simple object</span>
-<span class="kd">var</span> <span class="nx">base</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="nx">name</span><span class="o">:</span> <span class="s1">'base object'</span><span class="p">,</span>
-    <span class="nx">fn</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">};</span>
-
-<span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="p">{};</span>
-<span class="nx">moduler</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">foo</span><span class="p">);</span>
-<span class="c1">//define a module</span>
-<span class="nx">foo</span><span class="p">.</span><span class="nx">define</span><span class="p">(</span><span class="s1">'bar'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">name</span><span class="o">:</span> <span class="s1">'bar'</span><span class="p">,</span>
-        <span class="nx">fn</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="s1">' is another object'</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">};</span>
-<span class="p">});</span>
-
-<span class="c1">// pass the base object</span>
-<span class="nx">foo</span><span class="p">.</span><span class="nx">require</span><span class="p">([</span><span class="s1">'bar'</span><span class="p">],</span> <span class="p">{</span><span class="nx">base</span><span class="o">:</span> <span class="nx">base</span><span class="p">});</span>
-<span class="c1">// now base object is augmented with bar object, similar to mixin function</span>
-<span class="nx">base</span><span class="p">.</span><span class="nx">bar</span><span class="p">.</span><span class="nx">fn</span><span class="p">();</span> <span class="c1">// log 'bar is another object'</span>
-</pre></div>
-
-<h2>
-<a name="alias" class="anchor" href="#alias"><span class="octicon octicon-link"></span></a>alias</h2>
-
-<p>Use '<strong>as</strong>' to alias a module when using '<strong>require</strong>'</p>
-
-<div class="highlight highlight-javascript"><pre><span class="c1">// providerd that a 'Person' constructor module is already defined</span>
-<span class="c1">// now alias 'Person' as 'P'</span>
-<span class="kd">var</span> <span class="nx">dependency</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">require</span><span class="p">([</span><span class="s1">'Person as P'</span><span class="p">]);</span>
-<span class="s1">'P'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log true</span>
-<span class="s1">'Person'</span> <span class="k">in</span> <span class="nx">dependency</span><span class="p">;</span> <span class="c1">// log false</span>
 </pre></div>
       </section>
 

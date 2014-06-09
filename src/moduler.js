@@ -138,7 +138,10 @@ define(
             return resolver.exports(target, name, obj);
         },
         extend: function(name, fn) {
-            foundation.register(name, fn);
+            var envelope = {
+                util: util
+            };
+            foundation.register(name, fn, envelope);
         },
         bindDefine: function(target) {
             bindDefineModule = target;

@@ -1,4 +1,4 @@
-moduler
+Modulerjs
 =======
 
 A module manager.
@@ -51,10 +51,32 @@ me.name = 'Fei';
 me.introduce(); // log 'My name is Fei';
 ```
 ## require (fetch) modules
-require a module
+When require modules, Modulerjs will first try to resolve dependencies locally, if not found, the dependencies will be loaded via the path specified.
+
+The second parameter is the `dependency callback` which will be invoked when the all dependencies have been resolved.
+
+There is a third optional parameter, a `ready callback`. It will be called after the `dependency callback` and receive the `return value` of `dependency callback` as input parameter.
 ```javascript
-var dependency = foo.require(['bar']);
+var bar;
+foo.require(['bar'], function(bar) {
+    bar = bar;
+});
 
 // dependency will an object that containts 'bar' object
-'bar' in dependency; // log true
+'bar.name' // log 'bar'
+```
+
+## ready callback in require
+A typical use of the `ready` callback is to use `require` to load a plugin and invoke the plugin's `init` method.
+```javascript
+foo.require(
+    ['pluginDep1', 'pluginDep1'],
+    function(dep1, dep2){ // dependency callback
+        // define plugin with dep1 and dep2
+        return plugin;
+    },
+    function(plugin) { // ready callback
+        plugin.init();
+    }
+);
 ```

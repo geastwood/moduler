@@ -1,4 +1,6 @@
-define(['resolver', 'util', 'constant', 'foundation'], function(resolver, util, Constant, foundation) {
+define(
+    ['resolver', 'util', 'constant', 'foundation'],
+    function(resolver, util, Constant, foundation) {
 
     'use strict';
 

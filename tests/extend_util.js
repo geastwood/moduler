@@ -5,7 +5,7 @@ describe('extend util', function() {
     var getName, getTitle, getNothing;
 
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.require(['util'], function(util) {
             getName = util.pluck('name');
             getTitle = util.pluck('title');

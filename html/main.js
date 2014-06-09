@@ -1,5 +1,5 @@
 var foo = {};
-moduler.create(foo);
+Modulerjs.create(foo);
 var start = (new Date()).valueOf();
 var eclipse;
 foo.require(['module2'], function(m2) {

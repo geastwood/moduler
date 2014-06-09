@@ -1,4 +1,4 @@
-moduler.define('module2', function(m1, m4) {
+Modulerjs.define('module2', function(m1, m4) {
     return {
         name: 'module2 requires: ' + m4.name
     };

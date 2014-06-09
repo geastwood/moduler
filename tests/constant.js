@@ -2,7 +2,7 @@ describe('constant of a module', function() {
     var foo;
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
     });
 
     it('api', function() {
@@ -24,7 +24,7 @@ describe('more on constant', function() {
     var foo = {};
     var asyncRst1, asyncRst2;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.constant.set('c1', 'constant1');
         foo.constant.set('c2', 'constant2');
         foo.require(['Person'], function(Person) {
@@ -48,7 +48,7 @@ describe('constant in dynmaic script', function() {
     var foo = {};
     var rst;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.constant.set('c0', 'constant1 in foo');
         foo.require(['constantInDynamicScript'], function(global) {
             rst = global;
@@ -64,7 +64,7 @@ describe('constant in dynmaic script in ready callback', function() {
     var foo = {};
     var rst;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.constant.set('c0', 'constant1 in foo');
         foo.require(['constantInDynamicScript'], function(global) {
             return global;
@@ -82,8 +82,8 @@ describe('different modules share utils but not constant', function() {
     var foo = {}, bar = {};
     var asyncRst1, asyncRst2, p;
     beforeEach(function(done) {
-        moduler.create(foo);
-        moduler.create(bar);
+        Modulerjs.create(foo);
+        Modulerjs.create(bar);
         foo.constant.set('c1', 'constant1 in foo');
         foo.constant.set('c2', 'constant2 in foo');
         bar.constant.set('c1', 'constant1 in bar');

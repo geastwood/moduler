@@ -4,13 +4,13 @@ beforeEach(function() {
 });
 describe('api', function() {
     it('should have static create', function() {
-        expect(moduler.create).toBeDefined();
+        expect(Modulerjs.create).toBeDefined();
     });
     it('should have static export', function() {
-        expect(moduler.exports).toBeDefined();
+        expect(Modulerjs.exports).toBeDefined();
     });
     it('should have static extend', function() {
-        expect(moduler.extend).toBeDefined();
+        expect(Modulerjs.extend).toBeDefined();
     });
 });
 describe('static exports function', function() {
@@ -22,17 +22,17 @@ describe('static exports function', function() {
         }
     };
     it('should work with simple object', function() {
-        moduler.exports(fakeGlobal, 'some.deep.name.space.should.work', obj);
+        Modulerjs.exports(fakeGlobal, 'some.deep.name.space.should.work', obj);
         expect(fakeGlobal.some.deep.name.space.should.work.ok()).toBe('should work');
     });
     it('export to exist object', function() {
         fakeGlobal.anotherObj = {name: 'another obj'};
         expect(fakeGlobal.anotherObj.name).toBe('another obj');
 
-        moduler.exports(fakeGlobal.anotherObj, 'some.deep.name.space.should.work', obj);
+        Modulerjs.exports(fakeGlobal.anotherObj, 'some.deep.name.space.should.work', obj);
         expect(fakeGlobal.anotherObj.some.deep.name.space.should.work.ok()).toBe('should work');
 
-        moduler.exports(fakeGlobal, 'anotherObj.some.deep.name.space.should.work', obj);
+        Modulerjs.exports(fakeGlobal, 'anotherObj.some.deep.name.space.should.work', obj);
         expect(fakeGlobal.anotherObj.some.deep.name.space.should.work.ok()).toBe('should work');
     });
 });
@@ -43,7 +43,7 @@ describe('static create function', function() {
 
     beforeEach(function() {
         foo = {bar: {}};
-        moduler.create(foo.bar);
+        Modulerjs.create(foo.bar);
     });
 
     describe('the namespace should have a "define" and "require" function', function() {
@@ -65,7 +65,7 @@ describe('require LOCAL constructor', function() {
     var s = 'this is a person speaking';
     var rst, msg;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.define('greet', function() {
             return function(thing) { return thing; };
         });
@@ -96,7 +96,7 @@ describe('require REMOTE constructor', function() {
     var s = 'this is a person speaking';
     var rst, msg;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.require(['Person'], function(P) { // return callback
             var p1 = new P();
             return p1;
@@ -115,7 +115,7 @@ describe('require REMOTE module without "ready" callback', function() {
     var foo = {};
     var rst;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.require(['greet'], function(greet) {
             rst = greet;
             done();
@@ -129,7 +129,7 @@ describe('require REMOTE module without "ready" callback', function() {
     var foo = {};
     var rst;
     beforeEach(function(done) {
-        moduler.create(foo);
+        Modulerjs.create(foo);
         foo.require(['greet'], function(greet) {
             return greet;
         }, function(greet) {
@@ -149,8 +149,8 @@ xdescribe('mutilple objects', function() {
     beforeEach(function() {
         foo = {};
         bar = {};
-        moduler.create(foo);
-        moduler.create(bar);
+        Modulerjs.create(foo);
+        Modulerjs.create(bar);
         foo.define('module1', function() {
             return {
                 name: 'module1',

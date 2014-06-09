@@ -1,4 +1,4 @@
-moduler.define('module0', function() {
+Modulerjs.define('module0', function() {
     return {
         name: 'module0'
     };

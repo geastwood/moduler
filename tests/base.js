@@ -4,7 +4,7 @@ describe('base object when defining module', function() {
 
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
     });
 
     it('should work', function() {
@@ -32,7 +32,7 @@ describe('base object\'s each method', function() {
 
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
     });
 
     it('handle null', function() {
@@ -86,7 +86,7 @@ describe('base object\'s inherit method', function() {
     var foo, People;
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
         People = function() {};
         People.prototype.breath = 'air';
         People.prototype.talk = function(thing) {
@@ -140,7 +140,7 @@ describe('base object\'s mixin method', function() {
     };
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
         People = function() {};
         People.prototype.breath = 'air';
         People.prototype.talk = function(thing) {
@@ -203,7 +203,7 @@ describe('base object\'s create method', function() {
 
     beforeEach(function() {
         foo = {};
-        moduler.create(foo);
+        Modulerjs.create(foo);
         People = function() {};
         People.prototype.breath = 'air';
         People.prototype.talk = function(thing) {

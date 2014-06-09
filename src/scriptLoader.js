@@ -14,7 +14,7 @@ define(function() {
             that = this;
 
         script.src = this.url;
-        moduler.bindDefine(this.ns);
+        Modulerjs.bindDefine(this.ns);
         script.onload = function() {
             that.onLoadCallback(that.name);
         };

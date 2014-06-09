@@ -1,7 +1,7 @@
 describe('foundation when defining', function() {
     var foo = {};
     beforeEach(function() {
-        moduler.extend('Checkbox', function() {
+        Modulerjs.extend('Checkbox', function() {
             var Control = function() {};
             Control.prototype.type = 'input';
             Control.prototype.getType = function() {
@@ -12,7 +12,7 @@ describe('foundation when defining', function() {
             Checkbox.prototype.type = 'checkbox';
             return Checkbox;
         });
-        moduler.create(foo);
+        Modulerjs.create(foo);
     });
     it('should work', function() {
         foo.require(['Checkbox'], function(Checkbox) {

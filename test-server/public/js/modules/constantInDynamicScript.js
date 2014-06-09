@@ -1,4 +1,4 @@
-moduler.define('constantInDynamicScript', function() {
+Modulerjs.define('constantInDynamicScript', function() {
     return this;
 });
 console.log('this script is used for test "constant" object in script loading');

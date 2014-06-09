@@ -1,4 +1,4 @@
-moduler.define('greet', function() {
+Modulerjs.define('greet', function() {
     return function(msg) {
         return msg + '.';
     };

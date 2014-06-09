@@ -1,4 +1,4 @@
-moduler.define('Person', function(greet) {
+Modulerjs.define('Person', function(greet) {
 
     var Person = function() {};
     Person.prototype.breath = 'air';

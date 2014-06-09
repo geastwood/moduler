@@ -3,9 +3,9 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         jasmine: {
-            src: ['dist/moduler.js', 'extensions/*.js'],
+            src: ['dist/Modulerjs.js', 'extensions/*.js'],
             options: {
-                specs: ['tests/moduler.js',
+                specs: ['tests/Modulerjs.js',
                         'tests/constant.js',
                         'tests/foundation.js',
                         'tests/extend_util.js',
@@ -27,8 +27,8 @@ module.exports = function(grunt) {
                 options: {
                     baseUrl: 'src',
                     optimize: 'none',
-                    name: 'moduler',
-                    out: 'dist/moduler.js',
+                    name: 'Modulerjs',
+                    out: 'dist/Modulerjs.js',
                     wrap: true,
                     onModuleBundleComplete: function (data) {
                         var fs = require('fs'),
@@ -40,7 +40,7 @@ module.exports = function(grunt) {
                                 'start': ';(function() {\n',
                                 'end': '\n}());'
                             },
-                            globalModules: ['moduler']
+                            globalModules: ['Modulerjs']
                         }));
                     }
                 }

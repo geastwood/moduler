@@ -2,7 +2,7 @@ var fb = {};
 xdescribe('script loader', function() {
     var req;
     beforeEach(function() {
-        moduler.create(fb);
+        Modulerjs.create(fb);
         fb.define('bar', function(greeter, m2) {
             return {
                 name: 'bar',
@@ -22,7 +22,7 @@ xdescribe('script loader', function() {
 xdescribe('script loader mixed', function() {
     var req;
     beforeEach(function(done) {
-        moduler.create(fb);
+        Modulerjs.create(fb);
         fb.define('module3', function() {
             return {
                 name: 'module3'
@@ -47,7 +47,7 @@ xdescribe('script loader mixed', function() {
 xdescribe('script loader - require', function() {
     var req, f, msg;
     beforeEach(function(done) {
-        moduler.create(fb);
+        Modulerjs.create(fb);
         var req = fb.require(['greet', 'module2'], {}, function(greeter, m2) {
             f = {
                 name: 'bar',

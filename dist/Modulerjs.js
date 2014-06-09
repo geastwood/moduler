@@ -1,5 +1,5 @@
 ;(function() {
-var scriptLoader, dependencyManager, resolver, util, constant, foundation, moduler;
+var scriptLoader, dependencyManager, resolver, util, constant, foundation, Modulerjs;
 (function () {
     scriptLoader = function () {
         var ScriptLoader = function (url, ns, onLoadCallback, name) {
@@ -16,7 +16,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         ScriptLoader.prototype.load = function () {
             var script = document.createElement('script'), that = this;
             script.src = this.url;
-            moduler.bindDefine(this.ns);
+            Modulerjs.bindDefine(this.ns);
             script.onload = function () {
                 that.onLoadCallback(that.name);
             };
@@ -388,7 +388,7 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
             };
         return foundation;
     }();
-    moduler = function (Constant) {
+    Modulerjs = function (Constant) {
         
         var bindDefineModule = null;
         /**
@@ -516,5 +516,5 @@ var scriptLoader, dependencyManager, resolver, util, constant, foundation, modul
         };
     }(constant);
 }());
-window.moduler = moduler;
+window.Modulerjs = Modulerjs;
 }());

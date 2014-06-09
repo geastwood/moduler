@@ -10,4 +10,4 @@
 - path
 - shim
 - script loader error handling
-- maybe rename 'moduler' to ...
+- ~~maybe rename 'moduler' to 'Modulerjs'~~

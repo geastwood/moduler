@@ -13,12 +13,10 @@ describe('extend util', function() {
             done();
         });
     });
-
     it('pluck should work', function() {
         expect(getName(obj1)).toBe('foo');
         expect(getTitle(obj2)).toBe('Bar');
         expect(getNothing(obj2)).toBeUndefined();
         expect(getNothing(obj1)).toBeUndefined();
     });
-
 });

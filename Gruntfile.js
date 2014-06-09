@@ -7,6 +7,7 @@ module.exports = function(grunt) {
             options: {
                 specs: ['tests/moduler.js',
                         'tests/constant.js',
+                        'tests/foundation.js',
                         'tests/extend_util.js',
                         'tests/base.js',
                         'tests/script_loader.js']

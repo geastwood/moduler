@@ -1,13 +1,13 @@
-- [x] ~~script tag~~
-- [x] ~~cache~~
-- [x] ~~adapt require api to add ready callback and adapt tests~~
-- [x] ~~remove require augment base object~~
-- [x] ~~finish foundation (more tests)~~
-- [ ] remove alias
-- [ ] module blacklist
+- [x] script tag
+- [x] cache
+- [x] adapt require api to add ready callback and adapt tests
+- [x] remove require augment base object
+- [x] finish foundation (more tests)
+- [x] maybe rename 'moduler' to 'Modulerjs'
+- [x] remove alias
+- [ ] script loader error handling
 - [ ] module config
-- [ ] combo handler
 - [ ] path
 - [ ] shim
-- [ ] script loader error handling
-- [x] ~~maybe rename 'moduler' to 'Modulerjs'~~
+- [ ] combo handler
+- [ ] module blacklist ???needed???

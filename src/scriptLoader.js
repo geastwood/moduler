@@ -10,15 +10,36 @@ define(function() {
 
     // TODO: add cross-browser support
     ScriptLoader.prototype.load = function() {
-        var script = document.createElement('script'),
+
+        var doc = document,
+            head = doc.head || doc.getElementsByTagName('head')[0],
+            script = doc.createElement('script'),
             that = this;
 
+        script.type = 'text/javascript';
         script.src = this.url;
+        script.onerror = this.fail;
         Modulerjs.bindDefine(this.ns);
-        script.onload = function() {
-            that.onLoadCallback(that.name);
-        };
-        document.head.appendChild(script);
+
+        if (script.readyState) {
+            script.onreadystatechange = function() {
+                if (script.readyState == 'loaded' || script.readyState == 'complete') {
+                    script.id = 'loaded';
+                    script.onreadystatechange = null;
+                    that.onLoadCallback(that.name);
+                }
+            };
+        } else {
+            script.onload = function() {
+                that.onLoadCallback(that.name);
+            };
+        }
+
+        head.appendChild(script);
+    };
+
+    ScriptLoader.prototype.fail = function() {
+        throw new Error('script load error url: ' + this.src);
     };
 
     return ScriptLoader;

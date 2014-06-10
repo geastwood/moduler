@@ -5,7 +5,7 @@
 - [x] finish foundation (more tests)
 - [x] maybe rename 'moduler' to 'Modulerjs'
 - [x] remove alias
-- [ ] script loader error handling
+- [x] script loader error handling
 - [ ] module config
 - [ ] path
 - [ ] shim

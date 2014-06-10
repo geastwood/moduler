@@ -4,34 +4,7 @@
  * use for delegations of define and require method
  * set or get object for namespaces
  */
-define(['dependencyManager'], function(DM) {
-
-    //TODO: may need refactoring
-    var nameService = (function () {
-
-        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-
-        return {
-
-            module: function(name) {
-
-                var submodules;
-
-                // if there is a submodule
-                submodules = MODULE_NAME_REGEX.exec(name);
-
-                if (submodules) {
-                    return name.split('.').pop();
-                }
-
-                return name;
-
-            },
-            parseModule: function(name) {
-                return MODULE_NAME_REGEX.exec(name);
-            }
-        };
-    }());
+define(['dependencyManager', 'pathManager'], function(DM, pm) {
 
     /**
      * Resolve namespace with "get" or "set" methods
@@ -46,7 +19,7 @@ define(['dependencyManager'], function(DM) {
         }
 
         // here name doesn't have alias
-        parse = nameService.parseModule(name);
+        parse = pm.hasSubmodule(name);
         hasSubmodule = parse !== null;
 
         if (hasSubmodule) {
@@ -80,8 +53,12 @@ define(['dependencyManager'], function(DM) {
         return resolve(target, name, {action: 'set', obj: obj});
     }
 
+    /**
+     * Format return dependency data
+     */
     function formatDeps(source, target) {
         var deps = [];
+
         for (var dep in source) {
             if (source.hasOwnProperty(dep)) {
                 if (target) {
@@ -90,9 +67,15 @@ define(['dependencyManager'], function(DM) {
                 deps.push(source[dep]);
             }
         }
+
         return deps;
     }
 
+    /**
+     * Format the object will be bind with "this" keywork within "define" and "require"
+     *
+     * @return object
+     */
     function buildBind(source) {
         return {
             constant: source.constant,
@@ -139,7 +122,6 @@ define(['dependencyManager'], function(DM) {
     // api
     return {
         resolve: resolve,
-        nameService: nameService,
         define: define,
         require: require,
         exports: exports

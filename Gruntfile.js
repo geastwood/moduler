@@ -10,7 +10,8 @@ module.exports = function(grunt) {
                         'tests/foundation.js',
                         'tests/extend_util.js',
                         'tests/base.js',
-                        'tests/script_loader.js']
+                        'tests/script_loader.js',
+                        'tests/path_with_modules.js']
             }
         },
         watch: {

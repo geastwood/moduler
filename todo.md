@@ -6,8 +6,8 @@
 - [x] maybe rename 'moduler' to 'Modulerjs'
 - [x] remove alias
 - [x] script loader error handling
-- [ ] module config
 - [ ] path
+- [ ] module config
 - [ ] shim
 - [ ] combo handler
 - [ ] module blacklist ???needed???

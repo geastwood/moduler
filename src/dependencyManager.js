@@ -21,25 +21,25 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
      */
     DependencyManager.prototype.resolve = function() {
 
-        var i, len,
+        var i, len = this.deps.length,
             dep,
             aModule,
             moduleName,
             that = this;
 
         // if no deps needed, then just call ready callback
-        if (this.deps.length === 0) {
+        if (len === 0) {
             this.ready();
         }
 
-        for (i = 0, len = this.deps.length; i < len; i++) {
+        for (i = 0, len; i < len; i++) {
 
             dep = this.deps[i];
 
             // simple module name without deep namespace
             moduleName = pathManager.moduleName(dep);
             this.data[moduleName] = null;
-            aModule = resolver.resolve(this.source.modules, pathManager.fullModuleName(dep), {action: 'get'});
+            aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep));
 
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
@@ -69,7 +69,7 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
      */
     DependencyManager.prototype.register = function repeat(dep) {
 
-        var aModule = resolver.resolve(this.source.modules, pathManager.fullModuleName(dep), {action: 'get'}),
+        var aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep)),
             that = this;
 
         if (!aModule) {
@@ -81,8 +81,10 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
                 repeat.call(that, dep);
             }, 15);
         } else {
+
             // resolve one module, at this point we are sure, there is a value of "aModule"
             this.data[pathManager.moduleName(dep)] = aModule;
+
             // if any dependency is resolved, update call will be fired to check whether all dependencies are loaded
             // if yes, ready callback will by fired.
             this.update();
@@ -120,7 +122,8 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
      * @return undefined
      */
     DependencyManager.prototype.update = function() {
-        this.count = this.count + 1;
+        this.count += 1;
+
         if (this.count === this.deps.length) {
             this.ready();
         }

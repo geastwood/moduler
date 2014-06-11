@@ -8,7 +8,7 @@ define(['pathManager'], function(pathManager) {
         this.load();
     };
 
-    // TODO: add cross-browser support
+    // inject the script
     ScriptLoader.prototype.load = function() {
 
         var doc = document,

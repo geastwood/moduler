@@ -54,12 +54,19 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
     }
 
     /**
+     * Get a module by name
+     */
+    function getModule(target, name) {
+        return resolve(target, name, {action: 'get'});
+    }
+
+    /**
      * Format return dependency data
      */
     function formatDeps(source) {
-        var deps = [];
+        var deps = [], dep;
 
-        for (var dep in source) {
+        for (dep in source) {
             if (source.hasOwnProperty(dep)) {
                 deps.push(source[dep]);
             }
@@ -74,6 +81,7 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
      * @return object
      */
     function buildBind(source) {
+
         return {
             constant: source.constant,
             config: source.config,
@@ -121,6 +129,7 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
         resolve: resolve,
         define: define,
         require: require,
-        exports: exports
+        getModule: getModule, // behave as getter
+        exports: exports // behave as setter
     };
 });

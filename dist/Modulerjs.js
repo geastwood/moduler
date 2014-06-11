@@ -147,7 +147,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             // dependency name
             this.load();
         };
-        // TODO: add cross-browser support
+        // inject the script
         ScriptLoader.prototype.load = function () {
             var doc = document, head = doc.head || doc.getElementsByTagName('head')[0], script = doc.createElement('script'), that = this;
             script.type = 'text/javascript';
@@ -197,17 +197,17 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * @return undefined
          */
         DependencyManager.prototype.resolve = function () {
-            var i, len, dep, aModule, moduleName, that = this;
+            var i, len = this.deps.length, dep, aModule, moduleName, that = this;
             // if no deps needed, then just call ready callback
-            if (this.deps.length === 0) {
+            if (len === 0) {
                 this.ready();
             }
-            for (i = 0, len = this.deps.length; i < len; i++) {
+            for (i = 0, len; i < len; i++) {
                 dep = this.deps[i];
                 // simple module name without deep namespace
                 moduleName = pathManager.moduleName(dep);
                 this.data[moduleName] = null;
-                aModule = resolver.resolve(this.source.modules, pathManager.fullModuleName(dep), { action: 'get' });
+                aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep));
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
                     // load module remotely
@@ -229,7 +229,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * @return undefined
          */
         DependencyManager.prototype.register = function repeat(dep) {
-            var aModule = resolver.resolve(this.source.modules, pathManager.fullModuleName(dep), { action: 'get' }), that = this;
+            var aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep)), that = this;
             if (!aModule) {
                 // if the module at this point is "undefined" that means the loaded module has dependencies of other modules
                 // so register a recursive call to check the availablity of it's dependencies until it become available
@@ -273,7 +273,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * @return undefined
          */
         DependencyManager.prototype.update = function () {
-            this.count = this.count + 1;
+            this.count += 1;
             if (this.count === this.deps.length) {
                 this.ready();
             }
@@ -320,11 +320,17 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             });
         }
         /**
+         * Get a module by name
+         */
+        function getModule(target, name) {
+            return resolve(target, name, { action: 'get' });
+        }
+        /**
          * Format return dependency data
          */
         function formatDeps(source) {
-            var deps = [];
-            for (var dep in source) {
+            var deps = [], dep;
+            for (dep in source) {
                 if (source.hasOwnProperty(dep)) {
                     deps.push(source[dep]);
                 }
@@ -373,6 +379,8 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             resolve: resolve,
             define: define,
             require: require,
+            getModule: getModule,
+            // behave as getter
             exports: exports
         };
     }(dependencyManager, pathManager);

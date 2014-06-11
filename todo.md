@@ -7,7 +7,7 @@
 - [x] remove alias
 - [x] script loader error handling
 - [x] basic path @11th June
-- [ ] module config
+- [ ] basic module config
 - [ ] shim
 - [ ] combo handler
 - [ ] module blacklist ???needed???

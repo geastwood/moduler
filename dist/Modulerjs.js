@@ -110,7 +110,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             this.configure(options);
         };
         PathManager.prototype.configure = function (options) {
-            this.config = util.mixin({}, options.path, true, true);
+            this.config = options.path;
         };
         PathManager.prototype.path = function (name) {
             var url = this.config.baseUrl + name.replace(/\./g, '/') + '.js';
@@ -285,8 +285,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * Resolve namespace with "get" or "set" methods
          */
         function resolve(target, name, options) {
-            var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-            var parse, hasSubmodule;
+            var parse, hasSubmodule, MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
             options = options || { action: 'get' };
             if (!name) {
                 throw new Error('module name must be specified.');

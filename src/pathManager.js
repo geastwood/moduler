@@ -5,7 +5,7 @@ define(['util'], function(util) {
     };
 
     PathManager.prototype.configure = function(options) {
-        this.config = util.mixin({}, options.path, true, true);
+        this.config = options.path;
     };
     PathManager.prototype.path = function(name) {
         var url = this.config.baseUrl + name.replace(/\./g, '/') + '.js';

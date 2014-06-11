@@ -11,8 +11,10 @@ define(['dependencyManager'], function(DM) {
      */
     function resolve(target, name, options) {
 
-        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-        var parse, hasSubmodule;
+        var parse,
+            hasSubmodule,
+            MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
+
         options = options || {action: 'get'};
 
         if (!name) {

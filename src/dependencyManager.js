@@ -37,7 +37,11 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, PathM
 
         for (i = 0, len; i < len; i++) {
 
-            dep = this.deps[i];
+            if (this.source.isRemote) {
+                dep = this.pathManager.calculatePath(this.source.name, this.deps[i]);
+            } else {
+                dep = this.deps[i];
+            }
 
             // simple module name without deep namespace
             moduleName = this.pathManager.moduleName(dep);
@@ -53,7 +57,8 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, PathM
                         function(name) { /* callback for some script loader */
                             that.register(name);
                         },
-                        dep /* dependency name */);
+                        dep /* dependency name */,
+                        this.pathManager);
             } else {
                 this.register(dep);
             }

@@ -156,13 +156,15 @@ define(
         },
         bindDefine: function(target) {
             bindDefineModule = target;
+            bindDefineModule.isRemote = true;
         },
         define: function(name, fn, deps) {
 
             if (bindDefineModule === null) {
                 console.warn('Bind Define module is not set.');
             }
-            return define.call(bindDefineModule, name, fn, deps);
+            bindDefineModule.isRemote = true;
+            return define.call(bindDefineModule, bindDefineModule.name, fn, deps);
         }
     };
 });

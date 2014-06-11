@@ -1,10 +1,11 @@
-define(['pathManager'], function(pathManager) {
+define(function() {
 
-    var ScriptLoader = function(url, ns, onLoadCallback, name) {
+    var ScriptLoader = function(url, ns, onLoadCallback, name, pm) {
         this.url = url; // url of the module
         this.ns = ns; // source obj/ns obj to bind 'define' method
         this.onLoadCallback = onLoadCallback;
         this.name = name; // dependency name
+        this.pathManager = pm;
         this.load();
     };
 
@@ -19,6 +20,7 @@ define(['pathManager'], function(pathManager) {
         script.type = 'text/javascript';
         script.src = this.url;
         script.onerror = this.fail;
+        this.ns.name = this.pathManager.pathRelativeToBase(this.url);
         Modulerjs.bindDefine(this.ns);
 
         if (script.readyState) {

@@ -1,6 +1,46 @@
 ;(function() {
-var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foundation, Modulerjs;
+var scriptLoader, pathManager, dependencyManager, resolver, util, constant, foundation, Modulerjs;
 (function () {
+    scriptLoader = function () {
+        var ScriptLoader = function (url, ns, onLoadCallback, name, pm) {
+            this.url = url;
+            // url of the module
+            this.ns = ns;
+            // source obj/ns obj to bind 'define' method
+            this.onLoadCallback = onLoadCallback;
+            this.name = name;
+            // dependency name
+            this.pathManager = pm;
+            this.load();
+        };
+        // inject the script
+        ScriptLoader.prototype.load = function () {
+            var doc = document, head = doc.head || doc.getElementsByTagName('head')[0], script = doc.createElement('script'), that = this;
+            script.type = 'text/javascript';
+            script.src = this.url;
+            script.onerror = this.fail;
+            this.ns.name = this.pathManager.pathRelativeToBase(this.url);
+            Modulerjs.bindDefine(this.ns);
+            if (script.readyState) {
+                script.onreadystatechange = function () {
+                    if (script.readyState == 'loaded' || script.readyState == 'complete') {
+                        script.id = 'loaded';
+                        script.onreadystatechange = null;
+                        that.onLoadCallback(that.name);
+                    }
+                };
+            } else {
+                script.onload = function () {
+                    that.onLoadCallback(that.name);
+                };
+            }
+            head.appendChild(script);
+        };
+        ScriptLoader.prototype.fail = function () {
+            throw new Error('script load error url: ' + this.src);
+        };
+        return ScriptLoader;
+    }();
     pathManager = function () {
         var PathManager = function (options) {
             this.configure(options);
@@ -27,45 +67,19 @@ var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foun
         PathManager.prototype.fullModuleName = function (name) {
             return name;
         };
-        return PathManager;
-    }();
-    scriptLoader = function () {
-        var ScriptLoader = function (url, ns, onLoadCallback, name) {
-            this.url = url;
-            // url of the module
-            this.ns = ns;
-            // source obj/ns obj to bind 'define' method
-            this.onLoadCallback = onLoadCallback;
-            this.name = name;
-            // dependency name
-            this.load();
+        PathManager.prototype.pathRelativeToBase = function (name) {
+            return name.replace(this.config.baseUrl, '').replace('/', '.').replace('.js', '');
         };
-        // inject the script
-        ScriptLoader.prototype.load = function () {
-            var doc = document, head = doc.head || doc.getElementsByTagName('head')[0], script = doc.createElement('script'), that = this;
-            script.type = 'text/javascript';
-            script.src = this.url;
-            script.onerror = this.fail;
-            Modulerjs.bindDefine(this.ns);
-            if (script.readyState) {
-                script.onreadystatechange = function () {
-                    if (script.readyState == 'loaded' || script.readyState == 'complete') {
-                        script.id = 'loaded';
-                        script.onreadystatechange = null;
-                        that.onLoadCallback(that.name);
-                    }
-                };
+        PathManager.prototype.calculatePath = function (moduleName, depName) {
+            var prefix;
+            if (moduleName.indexOf('util')) {
+                prefix = 'util';
             } else {
-                script.onload = function () {
-                    that.onLoadCallback(that.name);
-                };
+                prefix = 'math';
             }
-            head.appendChild(script);
+            return prefix + '.' + depName;
         };
-        ScriptLoader.prototype.fail = function () {
-            throw new Error('script load error url: ' + this.src);
-        };
-        return ScriptLoader;
+        return PathManager;
     }();
     dependencyManager = function (SL, PathManager) {
         /**
@@ -99,7 +113,11 @@ var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foun
                 this.ready();
             }
             for (i = 0, len; i < len; i++) {
-                dep = this.deps[i];
+                if (this.source.isRemote) {
+                    dep = this.pathManager.calculatePath(this.source.name, this.deps[i]);
+                } else {
+                    dep = this.deps[i];
+                }
                 // simple module name without deep namespace
                 moduleName = this.pathManager.moduleName(dep);
                 this.data[moduleName] = null;
@@ -110,7 +128,7 @@ var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foun
                     new SL(this.pathManager.path(dep), this.source, function (name) {
                         /* callback for some script loader */
                         that.register(name);
-                    }, dep);
+                    }, dep, this.pathManager);
                 } else {
                     this.register(dep);
                 }
@@ -552,12 +570,14 @@ var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foun
             },
             bindDefine: function (target) {
                 bindDefineModule = target;
+                bindDefineModule.isRemote = true;
             },
             define: function (name, fn, deps) {
                 if (bindDefineModule === null) {
                     console.warn('Bind Define module is not set.');
                 }
-                return define.call(bindDefineModule, name, fn, deps);
+                bindDefineModule.isRemote = true;
+                return define.call(bindDefineModule, bindDefineModule.name, fn, deps);
             }
         };
     }(constant);

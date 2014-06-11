@@ -1,4 +1,4 @@
-Modulerjs.define('math.max', function() {
+Modulerjs.define('max', function() {
     return function() {
         return Math.max.apply(null, arguments);
     };

@@ -32,5 +32,20 @@ define(function() {
         return name;
     };
 
+    PathManager.prototype.pathRelativeToBase = function(name) {
+        return name.replace(this.config.baseUrl, '').replace('/', '.').replace('.js', '');
+    };
+
+    PathManager.prototype.calculatePath = function(moduleName, depName) {
+        var prefix;
+        if (moduleName.indexOf('util')) {
+            prefix = 'util';
+        } else {
+            prefix = 'math';
+        }
+
+        return prefix + '.' + depName;
+    };
+
     return PathManager;
 });

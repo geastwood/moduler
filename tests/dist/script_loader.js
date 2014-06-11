@@ -1,22 +1,15 @@
 var fb = {};
 describe('script loader', function() {
-    var req;
-    beforeEach(function() {
+    var req, rst;
+    beforeEach(function(done) {
         Modulerjs.create(fb);
-        fb.define('bar', function(greeter, m2) {
-            return {
-                name: 'bar',
-                say: function(msg) {
-                    return greeter(msg) + m2.name +  '!';
-                }
-            };
-        }, ['greet', 'module2']);
+        fb.require(['greet'], function(bar) {
+            rst = bar;
+            done();
+        });
     });
     it('should work', function() {
-        var req = fb.require(['greet'], {}, function(bar) {
-            expect(true).toBe(false);
-            expect(bar('some msg')).toBe('some msg');
-        });
+        expect(rst('some msg')).toBe('some msg.');
     });
 });
 describe('script loader - require', function() {

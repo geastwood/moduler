@@ -10,7 +10,7 @@ define(['util'], function(util) {
             util.mixin(config, options, false, true);
         },
         path: function(name) {
-            var url = config.baseUrl + name.replace('.', '/') + '.js';
+            var url = config.baseUrl + name.replace(/\./g, '/') + '.js';
             return url;
         },
 

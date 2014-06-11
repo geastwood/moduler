@@ -113,7 +113,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
                 util.mixin(config, options, false, true);
             },
             path: function (name) {
-                var url = config.baseUrl + name.replace('.', '/') + '.js';
+                var url = config.baseUrl + name.replace(/\./g, '/') + '.js';
                 return url;
             },
             /**

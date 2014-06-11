@@ -3,15 +3,23 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         jasmine: {
-            src: ['dist/Modulerjs.js', 'extensions/*.js'],
-            options: {
-                specs: ['tests/Modulerjs.js',
-                        'tests/constant.js',
-                        'tests/foundation.js',
-                        'tests/extend_util.js',
-                        'tests/base.js',
-                        'tests/script_loader.js',
-                        'tests/path_with_modules.js']
+            dist: {
+                src: ['dist/Modulerjs.js', 'extensions/*.js'],
+                options: {
+                    specs: ['tests/dist/*.js']
+                }
+            },
+            pathManager: {
+                src: ['src/pathManager.js'],
+                options: {
+                    specs: ['tests/parts/pathManager.js'],
+                    template: require('grunt-template-jasmine-requirejs'),
+                    templateOptions: {
+                        requireConfig: {
+                            baseUrl: 'src'
+                        }
+                    }
+                }
             }
         },
         watch: {

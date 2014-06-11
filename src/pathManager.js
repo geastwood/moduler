@@ -1,4 +1,4 @@
-define(['util'], function(util) {
+define(function() {
 
     var PathManager = function(options) {
         this.configure(options);

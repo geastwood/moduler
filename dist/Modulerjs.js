@@ -1,44 +1,6 @@
 ;(function() {
-var scriptLoader, util, pathManager, dependencyManager, resolver, constant, foundation, Modulerjs;
+var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foundation, Modulerjs;
 (function () {
-    scriptLoader = function () {
-        var ScriptLoader = function (url, ns, onLoadCallback, name) {
-            this.url = url;
-            // url of the module
-            this.ns = ns;
-            // source obj/ns obj to bind 'define' method
-            this.onLoadCallback = onLoadCallback;
-            this.name = name;
-            // dependency name
-            this.load();
-        };
-        // TODO: add cross-browser support
-        ScriptLoader.prototype.load = function () {
-            var doc = document, head = doc.head || doc.getElementsByTagName('head')[0], script = doc.createElement('script'), that = this;
-            script.type = 'text/javascript';
-            script.src = this.url;
-            script.onerror = this.fail;
-            Modulerjs.bindDefine(this.ns);
-            if (script.readyState) {
-                script.onreadystatechange = function () {
-                    if (script.readyState == 'loaded' || script.readyState == 'complete') {
-                        script.id = 'loaded';
-                        script.onreadystatechange = null;
-                        that.onLoadCallback(that.name);
-                    }
-                };
-            } else {
-                script.onload = function () {
-                    that.onLoadCallback(that.name);
-                };
-            }
-            head.appendChild(script);
-        };
-        ScriptLoader.prototype.fail = function () {
-            throw new Error('script load error url: ' + this.src);
-        };
-        return ScriptLoader;
-    }();
     util = function () {
         var hasOwn = Object.prototype.hasOwnProperty, ostring = Object.prototype.toString, nativeForEach = Array.prototype.forEach;
         function hasProp(obj, prop) {
@@ -151,7 +113,7 @@ var scriptLoader, util, pathManager, dependencyManager, resolver, constant, foun
                 util.mixin(config, options, false, true);
             },
             path: function (name) {
-                var url = config.baseUrl + this.moduleName(name) + '.js';
+                var url = config.baseUrl + name.replace('.', '/') + '.js';
                 return url;
             },
             /**
@@ -170,9 +132,47 @@ var scriptLoader, util, pathManager, dependencyManager, resolver, constant, foun
                 return MODULE_NAME_REGEX.exec(name);
             },
             fullModuleName: function (name) {
-                return this.moduleName(name);
+                return name;
             }
         };
+    }();
+    scriptLoader = function () {
+        var ScriptLoader = function (url, ns, onLoadCallback, name) {
+            this.url = url;
+            // url of the module
+            this.ns = ns;
+            // source obj/ns obj to bind 'define' method
+            this.onLoadCallback = onLoadCallback;
+            this.name = name;
+            // dependency name
+            this.load();
+        };
+        // TODO: add cross-browser support
+        ScriptLoader.prototype.load = function () {
+            var doc = document, head = doc.head || doc.getElementsByTagName('head')[0], script = doc.createElement('script'), that = this;
+            script.type = 'text/javascript';
+            script.src = this.url;
+            script.onerror = this.fail;
+            Modulerjs.bindDefine(this.ns);
+            if (script.readyState) {
+                script.onreadystatechange = function () {
+                    if (script.readyState == 'loaded' || script.readyState == 'complete') {
+                        script.id = 'loaded';
+                        script.onreadystatechange = null;
+                        that.onLoadCallback(that.name);
+                    }
+                };
+            } else {
+                script.onload = function () {
+                    that.onLoadCallback(that.name);
+                };
+            }
+            head.appendChild(script);
+        };
+        ScriptLoader.prototype.fail = function () {
+            throw new Error('script load error url: ' + this.src);
+        };
+        return ScriptLoader;
     }();
     dependencyManager = function (SL) {
         /**
@@ -217,7 +217,7 @@ var scriptLoader, util, pathManager, dependencyManager, resolver, constant, foun
                         that.register(name);
                     }, dep);
                 } else {
-                    this.register(dep, moduleName);
+                    this.register(dep);
                 }
             }
         };
@@ -323,13 +323,10 @@ var scriptLoader, util, pathManager, dependencyManager, resolver, constant, foun
         /**
          * Format return dependency data
          */
-        function formatDeps(source, target) {
+        function formatDeps(source) {
             var deps = [];
             for (var dep in source) {
                 if (source.hasOwnProperty(dep)) {
-                    if (target) {
-                        target[dep] = source[dep];
-                    }
                     deps.push(source[dep]);
                 }
             }

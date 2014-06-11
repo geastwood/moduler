@@ -56,14 +56,11 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
     /**
      * Format return dependency data
      */
-    function formatDeps(source, target) {
+    function formatDeps(source) {
         var deps = [];
 
         for (var dep in source) {
             if (source.hasOwnProperty(dep)) {
-                if (target) {
-                    target[dep] = source[dep];
-                }
                 deps.push(source[dep]);
             }
         }

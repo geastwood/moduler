@@ -10,7 +10,7 @@ define(['util'], function(util) {
             util.mixin(config, options, false, true);
         },
         path: function(name) {
-            var url = config.baseUrl + this.moduleName(name) + '.js';
+            var url = config.baseUrl + name.replace('.', '/') + '.js';
             return url;
         },
 
@@ -33,7 +33,7 @@ define(['util'], function(util) {
             return MODULE_NAME_REGEX.exec(name);
         },
         fullModuleName: function(name) {
-            return this.moduleName(name);
+            return name;
         }
     };
 });

@@ -11,3 +11,4 @@
 - [ ] shim
 - [ ] combo handler
 - [ ] module blacklist ???needed???
+- [ ] add a ready callback for define

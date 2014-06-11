@@ -1,4 +1,4 @@
-define(function() {
+define(['pathManager'], function(pathManager) {
 
     var ScriptLoader = function(url, ns, onLoadCallback, name) {
         this.url = url; // url of the module

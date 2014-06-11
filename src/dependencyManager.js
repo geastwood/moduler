@@ -54,7 +54,7 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
                         },
                         dep /* dependency name */);
             } else {
-                this.register(dep, moduleName);
+                this.register(dep);
             }
 
         }

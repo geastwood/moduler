@@ -32,3 +32,23 @@ describe('script loader - require', function() {
         expect(f.say('bar module and ')).toContain('bar module and');
     });
 });
+describe('script loader - define with a remote dep', function() {
+    var foo = {}, rst;
+    beforeEach(function(done) {
+        Modulerjs.create(foo);
+        foo.define('greetPlus', function(greet) {
+            return function(msg) {
+                return greet(msg) + '.';
+            };
+        }, ['greet']);
+        setTimeout(function() {
+            foo.require(['greetPlus'], function(greet) {
+                rst = greet;
+                done();
+            });
+        }, 1000);
+    });
+    it('should work', function() {
+        expect(rst('works')).toBe('works..');
+    });
+});

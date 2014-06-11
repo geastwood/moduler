@@ -23,7 +23,7 @@ define(
         }
 
         // delegate define method to resolver's define
-        resolver.define(this/* envelope */, name, fn, deps);
+        resolver.define(this/* envelope object */, name, fn, deps);
     };
 
     /**
@@ -39,9 +39,17 @@ define(
         options = options || {};
 
         // delegate require moethod to resolver's require method
-        return resolver.require(this/* envelope */, deps, fn, ready, options);
+        return resolver.require(this/* envelope object */, deps, fn, ready, options);
     };
 
+    /**
+     * Wrap around the obj to provide Modulers' methods, define, require etc.
+     * delegate the Modulerjs' create method
+     *
+     * @param object ns Namespace/object to attach methods
+     *
+     * @return object ns
+     */
     var moduleManager = function(ns) {
 
         // private module container
@@ -50,12 +58,14 @@ define(
         // augument default "modules" object with foundation's methods
         util.mixin(modules, foundation.modules);
 
+        // TODO
         var config = {};
 
         var setup = function(fn) {
             fn(config);
         };
 
+        // grab instance of constant service
         var constant = (function() {
             var constant = new Constant();
             return {

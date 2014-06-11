@@ -127,7 +127,7 @@ describe('require REMOTE module without "ready" callback', function() {
 });
 describe('require REMOTE module without "ready" callback', function() {
     var foo = {};
-    var rst;
+    var rst, rst1;
     beforeEach(function(done) {
         Modulerjs.create(foo);
         foo.require(['greet'], function(greet) {
@@ -135,43 +135,12 @@ describe('require REMOTE module without "ready" callback', function() {
         }, function(greet) {
             this.constant.set('bar', 'constant bar');
             rst = this.constant.get('bar');
+            rst1 = greet;
             done();
         });
     });
     it('"this" should point to "base" object', function() {
         expect(rst).toBe('constant bar');
+        expect(rst1('works')).toBe('works.');
     });
 });
-/*
-xdescribe('mutilple objects', function() {
-
-    var foo, bar;
-    beforeEach(function() {
-        foo = {};
-        bar = {};
-        Modulerjs.create(foo);
-        Modulerjs.create(bar);
-        foo.define('module1', function() {
-            return {
-                name: 'module1',
-                description: 'should belong to foo'
-            };
-        });
-        bar.define('module2', function() {
-            return {
-                name: 'module2',
-                description: 'should belong to bar'
-            };
-        });
-    });
-
-    it('should work', function() {
-        var depFoo = foo.require(['module1', 'module2']);
-        expect(depFoo.module2).not.toBeDefined();
-        var depBar = bar.require(['module1', 'module2']);
-        expect(depBar.module1).not.toBeDefined();
-    });
-
-});
-
-*/

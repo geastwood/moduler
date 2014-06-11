@@ -106,8 +106,8 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         };
     }();
     pathManager = function () {
-        var config = { baseUrl: 'http://localhost:8888/js/modules/' };
         var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
+        var config = { baseUrl: 'http://localhost:8888/js/modules/' };
         return {
             config: function (options) {
                 util.mixin(config, options, false, true);
@@ -117,7 +117,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
                 return url;
             },
             /**
-             * Get the module name
+             * Get the module name, if namespace only take the last one
              *
              * @return string
              */
@@ -191,7 +191,6 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             // hold deps counts
             this.data = {};
         };
-        var baseUrl = 'http://localhost:8888/js/modules/';
         /**
          * Try resolving all Deps
          *
@@ -414,7 +413,6 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         var foundation = {
                 modules: {},
                 register: function (name, fn, base) {
-                    console.log(base.util);
                     resolver.exports(this.modules, name, fn.call(base, this.modules));
                 }
             };
@@ -450,15 +448,25 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             // delegate require moethod to resolver's require method
             return resolver.require(this, deps, fn, ready, options);
         };
+        /**
+         * Wrap around the obj to provide Modulers' methods, define, require etc.
+         * delegate the Modulerjs' create method
+         *
+         * @param object ns Namespace/object to attach methods
+         *
+         * @return object ns
+         */
         var moduleManager = function (ns) {
             // private module container
             var modules = {};
             // augument default "modules" object with foundation's methods
             util.mixin(modules, foundation.modules);
+            // TODO
             var config = {};
             var setup = function (fn) {
                 fn(config);
             };
+            // grab instance of constant service
             var constant = function () {
                     var constant = new Constant();
                     return {

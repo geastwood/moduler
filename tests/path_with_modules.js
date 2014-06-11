@@ -42,7 +42,6 @@ describe('module with deep namespace, remote script has dependencies', function(
         });
     });
     it('should work', function() {
-        console.log(foo.debug.getModules());
         expect(f(2)).toBe(2);
         expect(f(1, 2, 3, 4, 5)).toBe(3);
         expect(f(1, 2, 3, 4, 5, 'string', ['array'])).toBe(3);

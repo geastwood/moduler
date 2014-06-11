@@ -14,8 +14,6 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
         this.data = {}; // hold deps data, name and objects
     };
 
-    var baseUrl = 'http://localhost:8888/js/modules/';
-
     /**
      * Try resolving all Deps
      *

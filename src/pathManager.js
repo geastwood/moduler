@@ -1,9 +1,9 @@
 define(['util'], function(util) {
 
+    var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
     var config = {
         baseUrl: 'http://localhost:8888/js/modules/'
     };
-    var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
 
     return {
         config: function(options) {
@@ -15,7 +15,7 @@ define(['util'], function(util) {
         },
 
         /**
-         * Get the module name
+         * Get the module name, if namespace only take the last one
          *
          * @return string
          */

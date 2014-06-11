@@ -6,7 +6,7 @@
 - [x] maybe rename 'moduler' to 'Modulerjs'
 - [x] remove alias
 - [x] script loader error handling
-- [ ] path
+- [x] basic path @11th June
 - [ ] module config
 - [ ] shim
 - [ ] combo handler

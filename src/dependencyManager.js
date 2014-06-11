@@ -1,4 +1,4 @@
-define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathManager) {
+define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, PathManager) {
 
     /**
      * Dependency manager constructor
@@ -7,11 +7,14 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
      *
      * @return object
      */
-    var DependencyManager = function(source, deps) {
+    var DependencyManager = function(source, deps, options) {
         this.source = source; // source of where objs are attached to
         this.deps = deps; // input deps
         this.count = 0; // hold deps counts
         this.data = {}; // hold deps data, name and objects
+
+        // setup pathmanager
+        this.pathManager = new PathManager(options);
     };
 
     /**
@@ -37,15 +40,15 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
             dep = this.deps[i];
 
             // simple module name without deep namespace
-            moduleName = pathManager.moduleName(dep);
+            moduleName = this.pathManager.moduleName(dep);
             this.data[moduleName] = null;
-            aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep));
+            aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep));
 
             // give warning if the resolved module is empty
             if (typeof aModule === 'undefined') {
 
                 // load module remotely
-                new SL(pathManager.path(dep)/* url */,
+                new SL(this.pathManager.path(dep)/* url */,
                         this.source/* modules */,
                         function(name) { /* callback for some script loader */
                             that.register(name);
@@ -69,7 +72,7 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
      */
     DependencyManager.prototype.register = function repeat(dep) {
 
-        var aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep)),
+        var aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep)),
             that = this;
 
         if (!aModule) {
@@ -83,7 +86,7 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, pathM
         } else {
 
             // resolve one module, at this point we are sure, there is a value of "aModule"
-            this.data[pathManager.moduleName(dep)] = aModule;
+            this.data[this.pathManager.moduleName(dep)] = aModule;
 
             // if any dependency is resolved, update call will be fired to check whether all dependencies are loaded
             // if yes, ready callback will by fired.

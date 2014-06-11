@@ -30,16 +30,14 @@ define(
      * Delegate to resolver.require
      * This function is for some validations
      */
-    var require = function(deps, fn, ready, options) {
+    var require = function(deps, fn, ready) {
 
         if (!util.isArray(deps)) {
             throw new Error('Dependencies must be supplied as an array.');
         }
 
-        options = options || {};
-
         // delegate require moethod to resolver's require method
-        return resolver.require(this/* envelope object */, deps, fn, ready, options);
+        return resolver.require(this/* envelope object */, deps, fn, ready);
     };
 
     /**
@@ -58,8 +56,11 @@ define(
         // augument default "modules" object with foundation's methods
         util.mixin(modules, foundation.modules);
 
-        // TODO
-        var config = {};
+        var config = {
+            path: {
+                baseUrl: 'http://localhost:8888/js/modules/'
+            }
+        };
 
         var setup = function(fn) {
             fn(config);
@@ -110,8 +111,8 @@ define(
          *
          * @return undefined
          */
-        ns.require = function(deps, fn, ready, options) {
-            return require.call(envelope, deps, fn, ready, options);
+        ns.require = function(deps, fn, ready) {
+            return require.call(envelope, deps, fn, ready);
         };
 
         /**

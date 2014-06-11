@@ -1,18 +1,25 @@
 define(function(require) {
+    var PM;
+    var defaultPath = 'http://localhost:8888/js/modules/';
+    var config = {
+        path: {
+            baseUrl: defaultPath
+        }
+    };
     describe('pathmanager: moduleName', function() {
-        var p;
         beforeEach(function() {
-            p = require('pathManager');
+            PM = require('pathManager');
+            p = new PM(config);
         });
         it('should work', function() {
             expect(p.moduleName('foo.bar.fb')).toBe('fb');
         });
     });
     describe('pathmanager: path', function() {
-        var p;
-        var defaultPath = 'http://localhost:8888/js/modules/';
+        var pm;
         beforeEach(function() {
-            p = require('pathManager');
+            PM = require('pathManager');
+            p = new PM(config);
         });
         it('should work', function() {
             expect(p.path('foo.bar.fb.bf')).toBe(defaultPath + 'foo/bar/fb/bf.js');
@@ -20,12 +27,14 @@ define(function(require) {
     });
 
     describe('pathmanager: path', function() {
-        var p;
+        var pm;
         var newPath = 'http://localhost:8888/js/venders/';
         beforeEach(function() {
-            p = require('pathManager');
-            p.config({
-                baseUrl: newPath
+            PM = require('pathManager');
+            p = new PM({
+                path: {
+                    baseUrl: newPath
+                }
             });
         });
         it('should work', function() {

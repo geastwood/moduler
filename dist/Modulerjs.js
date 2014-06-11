@@ -106,35 +106,32 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         };
     }();
     pathManager = function () {
-        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-        var config = { baseUrl: 'http://localhost:8888/js/modules/' };
-        return {
-            config: function (options) {
-                util.mixin(config, options, false, true);
-            },
-            path: function (name) {
-                var url = config.baseUrl + name.replace(/\./g, '/') + '.js';
-                return url;
-            },
-            /**
-             * Get the module name, if namespace only take the last one
-             *
-             * @return string
-             */
-            moduleName: function (name) {
-                var submodules = this.hasSubmodule;
-                if (submodules) {
-                    return name.split('.').pop();
-                }
-                return name;
-            },
-            hasSubmodule: function (name) {
-                return MODULE_NAME_REGEX.exec(name);
-            },
-            fullModuleName: function (name) {
-                return name;
-            }
+        var PathManager = function (options) {
+            this.configure(options);
         };
+        PathManager.prototype.configure = function (options) {
+            this.config = util.mixin({}, options.path, true, true);
+        };
+        PathManager.prototype.path = function (name) {
+            var url = this.config.baseUrl + name.replace(/\./g, '/') + '.js';
+            return url;
+        };
+        /**
+         * Get the module name, if namespace only take the last one
+         *
+         * @return string
+         */
+        PathManager.prototype.moduleName = function (name) {
+            var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
+            if (MODULE_NAME_REGEX.exec(name)) {
+                return name.split('.').pop();
+            }
+            return name;
+        };
+        PathManager.prototype.fullModuleName = function (name) {
+            return name;
+        };
+        return PathManager;
     }();
     scriptLoader = function () {
         var ScriptLoader = function (url, ns, onLoadCallback, name) {
@@ -174,7 +171,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         };
         return ScriptLoader;
     }();
-    dependencyManager = function (SL) {
+    dependencyManager = function (SL, PathManager) {
         /**
          * Dependency manager constructor
          * A dep manager only need the source Object and a list of dependency
@@ -182,7 +179,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          *
          * @return object
          */
-        var DependencyManager = function (source, deps) {
+        var DependencyManager = function (source, deps, options) {
             this.source = source;
             // source of where objs are attached to
             this.deps = deps;
@@ -190,6 +187,9 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             this.count = 0;
             // hold deps counts
             this.data = {};
+            // hold deps data, name and objects
+            // setup pathmanager
+            this.pathManager = new PathManager(options);
         };
         /**
          * Try resolving all Deps
@@ -205,13 +205,13 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             for (i = 0, len; i < len; i++) {
                 dep = this.deps[i];
                 // simple module name without deep namespace
-                moduleName = pathManager.moduleName(dep);
+                moduleName = this.pathManager.moduleName(dep);
                 this.data[moduleName] = null;
-                aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep));
+                aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep));
                 // give warning if the resolved module is empty
                 if (typeof aModule === 'undefined') {
                     // load module remotely
-                    new SL(pathManager.path(dep), this.source, function (name) {
+                    new SL(this.pathManager.path(dep), this.source, function (name) {
                         /* callback for some script loader */
                         that.register(name);
                     }, dep);
@@ -229,7 +229,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * @return undefined
          */
         DependencyManager.prototype.register = function repeat(dep) {
-            var aModule = resolver.getModule(this.source.modules, pathManager.fullModuleName(dep)), that = this;
+            var aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep)), that = this;
             if (!aModule) {
                 // if the module at this point is "undefined" that means the loaded module has dependencies of other modules
                 // so register a recursive call to check the availablity of it's dependencies until it become available
@@ -239,7 +239,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
                 }, 15);
             } else {
                 // resolve one module, at this point we are sure, there is a value of "aModule"
-                this.data[pathManager.moduleName(dep)] = aModule;
+                this.data[this.pathManager.moduleName(dep)] = aModule;
                 // if any dependency is resolved, update call will be fired to check whether all dependencies are loaded
                 // if yes, ready callback will by fired.
                 this.update();
@@ -279,19 +279,20 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             }
         };
         return DependencyManager;
-    }(scriptLoader);
-    resolver = function (DM, pm) {
+    }(scriptLoader, pathManager);
+    resolver = function (DM) {
         /**
          * Resolve namespace with "get" or "set" methods
          */
         function resolve(target, name, options) {
+            var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
             var parse, hasSubmodule;
             options = options || { action: 'get' };
             if (!name) {
                 throw new Error('module name must be specified.');
             }
             // here name doesn't have alias
-            parse = pm.hasSubmodule(name);
+            parse = MODULE_NAME_REGEX.exec(name);
             hasSubmodule = parse !== null;
             if (hasSubmodule) {
                 target[parse[1]] = target[parse[1]] || {};
@@ -351,7 +352,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         }
         function define(source, name, fn, deps) {
             // use a new dependencyManager to resolver the dependencies
-            var dm = new DM(source, deps);
+            var dm = new DM(source, deps, source.config);
             // define a ready callback with "registerReadyCb" function provided by DependencyManager object
             dm.ready = dm.registerReadyCb(function (data) {
                 var deps = formatDeps(data);
@@ -362,7 +363,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
         }
         function require(source, deps, fn, ready) {
             // use a new dependencyManager to resolver the dependencies
-            var dm = new DM(source, deps);
+            var dm = new DM(source, deps, source.config);
             // define a ready callback with "registerReadyCb" function provided by DependencyManager object
             dm.ready = dm.registerReadyCb(function (data) {
                 var deps = formatDeps(data), bind = buildBind(source), rst = fn.apply(bind, deps);
@@ -383,7 +384,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             // behave as getter
             exports: exports
         };
-    }(dependencyManager, pathManager);
+    }(dependencyManager);
     constant = function () {
         /**
          * Constant constructor function
@@ -448,13 +449,12 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
          * Delegate to resolver.require
          * This function is for some validations
          */
-        var require = function (deps, fn, ready, options) {
+        var require = function (deps, fn, ready) {
             if (!util.isArray(deps)) {
                 throw new Error('Dependencies must be supplied as an array.');
             }
-            options = options || {};
             // delegate require moethod to resolver's require method
-            return resolver.require(this, deps, fn, ready, options);
+            return resolver.require(this, deps, fn, ready);
         };
         /**
          * Wrap around the obj to provide Modulers' methods, define, require etc.
@@ -469,8 +469,7 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
             var modules = {};
             // augument default "modules" object with foundation's methods
             util.mixin(modules, foundation.modules);
-            // TODO
-            var config = {};
+            var config = { path: { baseUrl: 'http://localhost:8888/js/modules/' } };
             var setup = function (fn) {
                 fn(config);
             };
@@ -516,8 +515,8 @@ var util, pathManager, scriptLoader, dependencyManager, resolver, constant, foun
              *
              * @return undefined
              */
-            ns.require = function (deps, fn, ready, options) {
-                return require.call(envelope, deps, fn, ready, options);
+            ns.require = function (deps, fn, ready) {
+                return require.call(envelope, deps, fn, ready);
             };
             /**
              * Give module a constant function

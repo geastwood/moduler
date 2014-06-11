@@ -4,13 +4,14 @@
  * use for delegations of define and require method
  * set or get object for namespaces
  */
-define(['dependencyManager', 'pathManager'], function(DM, pm) {
+define(['dependencyManager'], function(DM) {
 
     /**
      * Resolve namespace with "get" or "set" methods
      */
     function resolve(target, name, options) {
 
+        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
         var parse, hasSubmodule;
         options = options || {action: 'get'};
 
@@ -19,7 +20,7 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
         }
 
         // here name doesn't have alias
-        parse = pm.hasSubmodule(name);
+        parse = MODULE_NAME_REGEX.exec(name);
         hasSubmodule = parse !== null;
 
         if (hasSubmodule) {
@@ -92,7 +93,7 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
     function define(source, name, fn, deps) {
 
         // use a new dependencyManager to resolver the dependencies
-        var dm = new DM(source, deps);
+        var dm = new DM(source, deps, source.config);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {
@@ -107,7 +108,7 @@ define(['dependencyManager', 'pathManager'], function(DM, pm) {
     function require(source, deps, fn, ready) {
 
         // use a new dependencyManager to resolver the dependencies
-        var dm = new DM(source, deps);
+        var dm = new DM(source, deps, source.config);
 
         // define a ready callback with "registerReadyCb" function provided by DependencyManager object
         dm.ready = dm.registerReadyCb(function(data) {

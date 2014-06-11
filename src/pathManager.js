@@ -1,39 +1,36 @@
 define(['util'], function(util) {
 
-    var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-    var config = {
-        baseUrl: 'http://localhost:8888/js/modules/'
+    var PathManager = function(options) {
+        this.configure(options);
     };
 
-    return {
-        config: function(options) {
-            util.mixin(config, options, false, true);
-        },
-        path: function(name) {
-            var url = config.baseUrl + name.replace(/\./g, '/') + '.js';
-            return url;
-        },
+    PathManager.prototype.configure = function(options) {
+        this.config = util.mixin({}, options.path, true, true);
+    };
+    PathManager.prototype.path = function(name) {
+        var url = this.config.baseUrl + name.replace(/\./g, '/') + '.js';
+        return url;
+    };
 
-        /**
-         * Get the module name, if namespace only take the last one
-         *
-         * @return string
-         */
-        moduleName: function(name) {
+    /**
+     * Get the module name, if namespace only take the last one
+     *
+     * @return string
+     */
+    PathManager.prototype.moduleName = function(name) {
 
-            var submodules = this.hasSubmodule;
+        var MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
 
-            if (submodules) {
-                return name.split('.').pop();
-            }
-
-            return name;
-        },
-        hasSubmodule: function(name) {
-            return MODULE_NAME_REGEX.exec(name);
-        },
-        fullModuleName: function(name) {
-            return name;
+        if (MODULE_NAME_REGEX.exec(name)) {
+            return name.split('.').pop();
         }
+
+        return name;
     };
+
+    PathManager.prototype.fullModuleName = function(name) {
+        return name;
+    };
+
+    return PathManager;
 });

@@ -22,13 +22,25 @@ module.exports = function(grunt) {
                 }
             }
         },
+        coffee: {
+            compile: {
+                options: {
+                    bare: true
+                },
+                files: {
+                    'src/pathManager.js': 'src/coffee/pathManager.coffee',
+                    'src/scriptLoader.js': 'src/coffee/scriptLoader.coffee'
+                }
+            }
+        },
         watch: {
             scripts: {
                 files: ['src/*.js',
+                        'src/coffee/*.coffee',
                         'extensions/*.js',
                         'tests/dist/*.js',
                         'tests/parts/*.js'],
-                tasks: ['build', 'jasmine']
+                tasks: ['coffee', 'build', 'jasmine']
             }
         },
         pkg: grunt.file.readJSON('package.json'),
@@ -66,6 +78,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-exec');
     grunt.registerTask('build', ['requirejs:js']);
     grunt.registerTask('server', ['exec']);

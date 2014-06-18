@@ -29,7 +29,9 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'src/pathManager.js': 'src/coffee/pathManager.coffee',
-                    'src/scriptLoader.js': 'src/coffee/scriptLoader.coffee'
+                    'src/scriptLoader.js': 'src/coffee/scriptLoader.coffee',
+                    'src/constant.js': 'src/coffee/constant.coffee',
+                    'src/foundation.js': 'src/coffee/foundation.coffee'
                 }
             }
         },

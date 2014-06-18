@@ -389,45 +389,37 @@ var pathManager, scriptLoader, dependencyManager, resolver, util, constant, foun
         };
     }();
     constant = function () {
-        /**
-         * Constant constructor function
-         *
-         * @return object
-         */
-        var Constant = function () {
-        };
-        /**
-         * getter
-         *
-         * @return mixed
-         */
-        Constant.prototype.get = function (name) {
-            return this[name];
-        };
-        /**
-         * Setter
-         *
-         * @return boolean
-         */
-        Constant.prototype.set = function (name, value) {
-            var status = false;
-            if (typeof this[name] === 'undefined') {
-                this[name] = value;
-                status = true;
-            } else {
-                console.warn('try to set again the constant: ' + this[name]);
+        var Constant;
+        Constant = function () {
+            function Constant() {
             }
-            return status;
-        };
+            Constant.prototype.get = function (name) {
+                return this[name];
+            };
+            Constant.prototype.set = function (name, value) {
+                var status;
+                status = false;
+                if (this[name] == null) {
+                    this[name] = value;
+                    return true;
+                } else {
+                    console.warn('Try to set again the constant: ' + this[name]);
+                }
+                return status;
+            };
+            return Constant;
+        }();
         return Constant;
     }();
     foundation = function () {
-        var foundation = {
-                modules: {},
-                register: function (name, fn, base) {
-                    resolver.exports(this.modules, name, fn.call(base, this.modules));
-                }
-            };
+        var foundation;
+        foundation = {
+            modules: {},
+            register: function (name, fn, base) {
+                resolver.exports(this.modules, name, fn.call(base, this.modules));
+                return void 0;
+            }
+        };
         return foundation;
     }();
     Modulerjs = function (Constant) {

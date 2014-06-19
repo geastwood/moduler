@@ -32,6 +32,7 @@ module.exports = function(grunt) {
                     'src/scriptLoader.js': 'src/coffee/scriptLoader.coffee',
                     'src/constant.js': 'src/coffee/constant.coffee',
                     'src/dependencyManager.js': 'src/coffee/dependencyManager.coffee',
+                    'src/resolver.js': 'src/coffee/resolver.coffee',
                     'src/foundation.js': 'src/coffee/foundation.coffee'
                 }
             }

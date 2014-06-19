@@ -1,138 +1,90 @@
-/**
- * resolver
- * use to resolve namespaces
- * use for delegations of define and require method
- * set or get object for namespaces
- */
+var __hasProp = {}.hasOwnProperty;
+
 define(['dependencyManager'], function(DM) {
-
-    /**
-     * Resolve namespace with "get" or "set" methods
-     */
-    function resolve(target, name, options) {
-
-        var parse,
-            hasSubmodule,
-            MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
-
-        options = options || {action: 'get'};
-
-        if (!name) {
-            throw new Error('module name must be specified.');
-        }
-
-        // here name doesn't have alias
-        parse = MODULE_NAME_REGEX.exec(name);
-        hasSubmodule = parse !== null;
-
-        if (hasSubmodule) {
-
-            target[parse[1]] = target[parse[1]] || {};
-
-            // recursively solve the namespace
-            return resolve(target[parse[1]], parse[2], options);
-        }
-
-        if (options.action === 'get') {
-            return target[name];
-        } else if (options.action === 'set') {
-
-            if (typeof options.obj === undefined) {
-                throw new Error('Set action with an empty object.');
-            }
-
-            target[name] = options.obj;
-            return true;
-        } else {
-            throw new Error('Unsupported action.');
-        }
-
-    }
-
-    /**
-     * exports function, delegate to set action of resolve function
-     */
-    function exports(target, name, obj) {
-        return resolve(target, name, {action: 'set', obj: obj});
-    }
-
-    /**
-     * Get a module by name
-     */
-    function getModule(target, name) {
-        return resolve(target, name, {action: 'get'});
-    }
-
-    /**
-     * Format return dependency data
-     */
-    function formatDeps(source) {
-        var deps = [], dep;
-
-        for (dep in source) {
-            if (source.hasOwnProperty(dep)) {
-                deps.push(source[dep]);
-            }
-        }
-
-        return deps;
-    }
-
-    /**
-     * Format the object will be bind with "this" keywork within "define" and "require"
-     *
-     * @return object
-     */
-    function buildBind(source) {
-
-        return {
-            constant: source.constant,
-            config: source.config,
-            util: source.util
-        };
-    }
-
-    function define(source, name, fn, deps) {
-
-        // use a new dependencyManager to resolver the dependencies
-        var dm = new DM(source, deps, source.config);
-
-        // define a ready callback with "registerReadyCb" function provided by DependencyManager object
-        dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps(data);
-            exports(source.modules, name, fn.apply(buildBind(source), deps));
-        });
-
-        // resolve the dependency
-        dm.resolve();
-    }
-
-    function require(source, deps, fn, ready) {
-
-        // use a new dependencyManager to resolver the dependencies
-        var dm = new DM(source, deps, source.config);
-
-        // define a ready callback with "registerReadyCb" function provided by DependencyManager object
-        dm.ready = dm.registerReadyCb(function(data) {
-            var deps = formatDeps(data),
-                bind = buildBind(source),
-                rst = fn.apply(bind, deps);
-
-            if (ready) { // call ready callback, if there is one
-                ready.call(bind, rst);
-            }
-        });
-
-        // resolve the dependency
-        dm.resolve();
-    }
-
-    // api
-    return {
-        resolve: resolve,
-        define: define,
-        require: require,
-        getModule: getModule, // behave as getter
-        exports: exports // behave as setter
+  var buildBind, define, exports, formatDeps, getModule, require, resolve;
+  resolve = function(target, name, options) {
+    var MODULE_NAME_REGEX, hasSubmodule, parse;
+    MODULE_NAME_REGEX = /(\S+?)\.(\S+)/;
+    options = options || {
+      action: 'get'
     };
+    if (!name) {
+      throw new Error('Module name must be specified');
+    }
+    parse = MODULE_NAME_REGEX.exec(name);
+    hasSubmodule = parse !== null;
+    if (hasSubmodule) {
+      target[parse[1]] = target[parse[1]] || {};
+      resolve(target[parse[1]], parse[2], options);
+    }
+    if (options.action === 'get') {
+      return target[name];
+    } else if (options.action === 'set') {
+      if (typeof options.obj === void 0) {
+        throw new Error('Set action with an empty object');
+      }
+      target[name] = options.obj;
+      return true;
+    } else {
+      throw new Error('Unsupported action.');
+    }
+  };
+  exports = function(target, name, obj) {
+    return resolve(target, name, {
+      action: 'set',
+      obj: obj
+    });
+  };
+  getModule = function(target, name) {
+    return resolve(target, name, {
+      action: 'get'
+    });
+  };
+  formatDeps = function(source) {
+    var dep, deps, key;
+    deps = [];
+    for (key in source) {
+      if (!__hasProp.call(source, key)) continue;
+      dep = source[key];
+      deps.push(dep);
+    }
+    return deps;
+  };
+  buildBind = function(source) {
+    return {
+      constant: source.constant,
+      config: source.config,
+      util: source.util
+    };
+  };
+  define = function(source, name, fn, deps) {
+    var dm;
+    dm = new DM(source, deps, source.config);
+    dm.ready = dm.registerReadyCb(function(data) {
+      deps = formatDeps(data);
+      return exports(source.modules, name, fn.apply(buildBind(source), deps));
+    });
+    return dm.resolve();
+  };
+  require = function(source, deps, fn, ready) {
+    var dm;
+    dm = new DM(source, deps, source.config);
+    dm.ready = dm.registerReadyCb(function(data) {
+      var bind, rst;
+      deps = formatDeps(data);
+      bind = buildBind(source);
+      rst = fn.apply(bind, deps);
+      if (ready) {
+        return typeof ready.call === "function" ? ready.call(bind, rst) : void 0;
+      }
+    });
+    return dm.resolve();
+  };
+  return {
+    resolve: resolve,
+    define: define,
+    require: require,
+    getModule: getModule,
+    exports: exports
+  };
 });

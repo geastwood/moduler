@@ -1,5 +1,19 @@
 define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, PathManager) {
-  var DependencyManager;
+  var DependencyManager, register;
+  register = function(dep) {
+    var aModule;
+    aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep));
+    if (!aModule) {
+      return setTimeout((function(_this) {
+        return function() {
+          return register.call(_this, dep);
+        };
+      })(this), 15);
+    } else {
+      this.data[this.pathManager.moduleName(dep)] = aModule;
+      return this.update();
+    }
+  };
   return DependencyManager = (function() {
     function DependencyManager(source, deps, options) {
       this.source = source;
@@ -35,21 +49,7 @@ define(['resolver', 'scriptLoader', 'pathManager'], function(resolver, SL, PathM
       return _results;
     };
 
-    DependencyManager.prototype.register = function(dep) {
-      var aModule, fn;
-      aModule = resolver.getModule(this.source.modules, this.pathManager.fullModuleName(dep));
-      fn = arguments.callee;
-      if (!aModule) {
-        return setTimeout((function(_this) {
-          return function() {
-            return fn.call(_this, dep);
-          };
-        })(this), 15);
-      } else {
-        this.data[this.pathManager.moduleName(dep)] = aModule;
-        return this.update();
-      }
-    };
+    DependencyManager.prototype.register = register;
 
     DependencyManager.prototype.ready = function() {
       throw new Error('This method need to be implemented. Cannot be called from here');

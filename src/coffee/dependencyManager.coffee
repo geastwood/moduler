@@ -1,4 +1,15 @@
 define ['resolver', 'scriptLoader', 'pathManager'], (resolver, SL, PathManager) ->
+    # to resolve recursion
+    register = (dep) ->
+        aModule = resolver.getModule(@source.modules, @pathManager.fullModuleName(dep))
+
+        unless aModule
+            setTimeout(=>  register.call(@, dep),
+            15)
+        else
+            @data[@pathManager.moduleName(dep)] = aModule
+            @update()
+
     class DependencyManager
         constructor: (source, deps, options) ->
             @source = source
@@ -23,17 +34,8 @@ define ['resolver', 'scriptLoader', 'pathManager'], (resolver, SL, PathManager) 
                     dep)
                 else
                     @register(dep)
-        register: (dep)->
-            aModule = resolver.getModule(@source.modules, @pathManager.fullModuleName(dep))
-            fn = arguments.callee
 
-            unless aModule
-                setTimeout(=>  fn.call(@, dep),
-                15)
-            else
-                @data[@pathManager.moduleName(dep)] = aModule
-                @update()
-
+        register: register
         ready: ->
             throw new Error('This method need to be implemented. Cannot be called from here')
         registerReadyCb: (fn) ->
